@@ -1,3 +1,27 @@
-.dfx
 node_modules
+.DS_Store
 dist
+dist-ssr
+*.local
+
+.dfx
+
+.idea
+.venv
+
+.env
+
+# exclude ts generated files
+vite.config.js
+vite.config.js.map
+yarn-error.log
+
+# exclude storybook static files
+storybook-static
+
+src/frontend/vitest-test-result.xml
+.vitest-result.json
+
+cypress/screenshots/*
+
+.tmp

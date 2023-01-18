@@ -1,19 +1,19 @@
 {
   "canisters": {
-    "counter": {
-      "main": "canisters/counter/main.mo",
+    "webpage": {
+      "main": "./src/webpage/main.mo",
       "type": "motoko"
     },
-    "assets": {
-      "dependencies": [
-        "counter"
-      ],
+    "dao": {
+      "main": "./src/dao/main.mo",
+      "type": "motoko"
+    },
+    "ui": {
+      "dependencies": ["webpage", "dao"],
       "frontend": {
         "entrypoint": "dist/index.html"
       },
-      "source": [
-        "dist/"
-      ],
+      "source": ["dist"],
       "type": "assets"
     }
   },
@@ -27,10 +27,12 @@
       "bind": "127.0.0.1:8000",
       "type": "ephemeral"
     },
+    "staging": {
+      "providers": ["https://ic0.app"],
+      "type": "persistent"
+    },
     "ic": {
-      "providers": [
-        "https://mainnet.dfinity.network"
-      ],
+      "providers": ["https://mainnet.dfinity.network"],
       "type": "persistent"
     }
   },
