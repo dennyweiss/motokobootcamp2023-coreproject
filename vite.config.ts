@@ -79,15 +79,15 @@ console.log("🚀", canisterDefinitions, canisterAliases)
 export const uiAliases = {
   vue: path.resolve("./node_modules/vue"),
   ...canisterAliases,
-  "~": `${resolve(__dirname, "src/ui")}/`,
-  "@": `${resolve(__dirname, "src/ui")}/`,
+  "~": `${resolve(__dirname, "src/interface")}/`,
+  "@": `${resolve(__dirname, "src/interface")}/`,
 }
 
 // See guide on how to configure Vite at:
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [vue()],
-  root: resolve(__dirname, "src/ui"),
+  root: resolve(__dirname, "src/interface"),
   resolve: {
     alias: {
       ...uiAliases,

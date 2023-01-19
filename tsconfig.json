@@ -25,9 +25,9 @@
     "isolatedModules": true
   },
   "include": [
-    "src/ui/**/*.ts",
-    "src/ui/**/*.d.ts",
-    "src/ui/**/*.tsx",
-    "src/ui/**/*.vue"
+    "src/interface/**/*.ts",
+    "src/interface/**/*.d.ts",
+    "src/interface/**/*.tsx",
+    "src/interface/**/*.vue"
   ]
 }

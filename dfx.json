@@ -8,7 +8,7 @@
       "main": "./src/dao/main.mo",
       "type": "motoko"
     },
-    "ui": {
+    "interface": {
       "dependencies": ["webpage", "dao"],
       "frontend": {
         "entrypoint": "dist/index.html"
