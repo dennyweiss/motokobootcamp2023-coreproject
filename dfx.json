@@ -6,7 +6,8 @@
     },
     "dao": {
       "main": "./src/dao/main.mo",
-      "type": "motoko"
+      "type": "motoko",
+      "dependencies": ["webpage"]
     },
     "interface": {
       "dependencies": ["webpage", "dao"],
@@ -19,12 +20,12 @@
   },
   "defaults": {
     "build": {
-      "packtool": ""
+      "packtool": "vessel sources"
     }
   },
   "networks": {
     "local": {
-      "bind": "127.0.0.1:8000",
+      "bind": "127.0.0.1:8001",
       "type": "ephemeral"
     },
     "staging": {

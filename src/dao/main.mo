@@ -1,6 +1,6 @@
-actor {
-  //My discord is: iri#1598
-  //Feel free to DM me any question.
+import Webpage "canister:webpage";
+
+actor Dao {
   type Proposal = {}; // TO DEFINE;
 
   public shared ({ caller }) func submit_proposal(this_payload : Text) : async {
@@ -24,4 +24,9 @@ actor {
   public query func get_all_proposals() : async [(Int, Proposal)] {
     return [];
   };
+
+  public shared ({caller}) func updateWebpageContent(content: Text) : async () {
+     await Webpage.updateContent(content);
+  }
+
 };
