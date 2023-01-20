@@ -10,9 +10,10 @@ if [[ ! -d "${PROJECT_ROOT}" ]]; then
   echo -e "\n${c_lred}[FAILURE] - could not find project root directory${c_reset}"
 fi
 
+# shellcheck disable=SC2046
 $(vessel bin)/moc -r $(vessel sources) -wasi-system-api "${PROJECT_ROOT}/src/"**/*.spec.mo
 
-if  [[ "${?}" == "0" ]]; then
+if ! $?; then
 echo -e "\n${c_lgreen}[OK]${c_reset} - test suite run went well"
 else
 echo -e "\n${c_lred}[FAILED] - test suite run failed${c_reset}"
