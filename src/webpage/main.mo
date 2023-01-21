@@ -11,13 +11,9 @@ import Admin "../support/Admin";
 import Buffer "mo:base/Buffer";
 
 actor Webpage {
-  public type HttpRequest = Http.HttpRequest;
-  public type HttpResponse = Http.HttpResponse;
-
-  stable var page_content : Text = "Initial content";
+  //////////////////////////////////////////////////////////////////////////////
+  // Environment Guards ////////////////////////////////////////////////////////
   stable var environment : Text = "local";
-
-  let admins : [Principal] = [Principal.fromText("4wtdz-zhyfn-46p4d-apw5i-weord-ktvsf-n4jge-qqsf6-ftski-i7fr3-pqe")];
   let environments : [Environment.Environment] = [
     {
       name = "local";
@@ -29,15 +25,20 @@ actor Webpage {
   ];
   let guard = Environment.PrincipalGuard(environments);
 
-  public shared ({ caller }) func changeEnvironment(environmentName : Text) : async () {
-    assert (Admin.isAdmin(caller, admins));
+  public shared ({ caller }) func setEnvironment(environmentName : Text) : async () {
+    assert (Admin.isAdmin(caller));
     environment := environmentName;
     ();
   };
 
-  public func currentEnvironment() : async Text {
+  public func getEnvironment() : async Text {
     return environment;
   };
+
+  //////////////////////////////////////////////////////////////////////////////
+  // HTTP Handler //////////////////////////////////////////////////////////////
+  public type HttpRequest = Http.HttpRequest;
+  public type HttpResponse = Http.HttpResponse;
 
   public query func http_request(req : HttpRequest) : async HttpResponse {
     let response = {
@@ -50,9 +51,15 @@ actor Webpage {
     return response;
   };
 
+  //////////////////////////////////////////////////////////////////////////////
+  // Dynamic Content ///////////////////////////////////////////////////////////
+  stable var page_content : Text = "Initial content";
   public shared ({ caller }) func updateWebpageContent(new_page_content : Text) : async () {
     assert (guard.allowAccess(environment, Principal.toText(caller)));
     page_content := new_page_content;
   };
 
+  public func getContent() : async Text {
+    return page_content;
+  }
 };
