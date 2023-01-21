@@ -25,8 +25,8 @@ actor Dao {
     return [];
   };
 
-  public shared ({caller}) func updateWebpageContent(content: Text) : async () {
-     await Webpage.updateContent(content);
-  }
+  public shared ({ caller }) func updateWebpageContent(content : Text) : async () {
+    await Webpage.updateContent(content);
+  };
 
 };

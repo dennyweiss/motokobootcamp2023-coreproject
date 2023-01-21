@@ -3,7 +3,7 @@ import Debug "mo:base/Debug";
 import Text "mo:base/Text";
 
 module Environment {
-  type Environment = {
+  public type Environment = {
     name : Text;
     principals : [Text];
   };
@@ -28,13 +28,8 @@ module Environment {
         case (null)[];
       };
 
-      Debug.print(debug_show(principal));
-
       return switch (
-        Array.find<Text>(supportedPrinciples, func(x) { 
-          Debug.print(debug_show(x));
-          Text.equal(x, principal) 
-          }),
+        Array.find<Text>(supportedPrinciples, func(x) { Text.equal(x, principal) }),
       ) {
         case (?a) true;
         case _ false;
