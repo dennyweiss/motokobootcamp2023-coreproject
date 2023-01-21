@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+c_reset=$(echo -en '\033[0m')
+c_lred=$(echo -en '\033[01;31m')
+c_lgreen=$(echo -en '\033[01;33m')
+
+SCRIPT_DIR=$(dirname "${0}")
+PROJECT_ROOT="$(dirname "${SCRIPT_DIR}")"
+
+if [[ ! -d "${PROJECT_ROOT}" ]]; then
+  echo -e "\n${c_lred}[FAILURE] - could not find project root directory${c_reset}"
+fi
+
+# shellcheck disable=SC2046
+$(vessel bin)/moc -r $(vessel sources) -wasi-system-api "${PROJECT_ROOT}/src/"**/*.spec.mo
+
+if ! $?; then
+echo -e "\n${c_lgreen}[OK]${c_reset} - test suite run went well"
+else
+echo -e "\n${c_lred}[FAILED] - test suite run failed${c_reset}"
+fi

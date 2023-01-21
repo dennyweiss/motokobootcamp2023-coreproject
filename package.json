@@ -19,7 +19,8 @@
     "code:style:fix:frontend": "yarn pprettier --ignore-path=.eslintignore --write \\\"src/interface/**/*.{js,ts,tsx,json,css,vue,md,yml,yaml}\\\"",
     "code:style:fix:motoko": "yarn pprettier --ignore-path=.eslintignore --write \"src/{dao,webpage}/*.mo\"",
     "code:analyse": "eslint  --ext .js --ext .vue --ext .yaml --ext .yml --ext .ts --ignore-path .eslintignore .",
-    "code:analyse:fix": "eslint --ext .js --ext .vue --ext .yaml --ext .yml --ext .ts --ignore-path .eslintignore --fix ."
+    "code:analyse:fix": "eslint --ext .js --ext .vue --ext .yaml --ext .yml --ext .ts --ignore-path .eslintignore --fix .",
+    "code:test": "bin/run-tests"
   },
   "dependencies": {
     "@connect2ic/core": "^0.1.6",
