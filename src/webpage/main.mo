@@ -59,7 +59,7 @@ actor Webpage {
     page_content := new_page_content;
   };
 
-  public func getContent() : async Text {
+  public query func getContent() : async Text {
     return page_content;
   }
 };

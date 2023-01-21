@@ -30,7 +30,7 @@ actor Dao {
 
   //////////////////////////////////////////////////////////////////////////////
   // Proposal //////////////////////////////////////////////////////////////////
-  type Proposal = {}; // TO DEFINE;
+  type Proposal = {};
 
   public query func get_proposal(id : Int) : async ?Proposal {
     return null;
@@ -62,4 +62,9 @@ actor Dao {
     assert( environment == "local" );
     await Webpage.updateWebpageContent(content);
   };
+  
+  public func getContent() : async Text {
+    return await Webpage.getContent();
+  }
+
 };

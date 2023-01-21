@@ -5,7 +5,13 @@ let Package =
 let
   -- This is where you can add your own packages to the package-set
   additions =
-    [] : List Package
+    [
+     { name = "stable"
+      , repo = "https://github.com/aviate-labs/stable.mo"
+      , version = "v0.1.1"
+      , dependencies = ["base"]
+    }      
+    ] : List Package
 
 let
   {- This is where you can override existing packages in the package-set
