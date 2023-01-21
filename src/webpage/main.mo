@@ -61,5 +61,5 @@ actor Webpage {
 
   public query func getContent() : async Text {
     return page_content;
-  }
+  };
 };

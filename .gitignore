@@ -25,3 +25,4 @@ src/frontend/vitest-test-result.xml
 cypress/screenshots/*
 
 .tmp
+.vessel
