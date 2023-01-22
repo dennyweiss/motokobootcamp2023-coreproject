@@ -9,12 +9,18 @@ module Proposal {
   let statusPublished = "isPublished";
   let statusArchived = "isArchived";
 
+  public type ProposalStatus = {
+    #isDraft;
+    #isPublished;
+    #votingHasFinsihed;
+    #isArchived;
+  };
+
  public type Proposal = {
     title : Text;
     description : Text;
-    status : Text;
+    status : ProposalStatus;
     owner : Principal;
-    votingFinished: Bool;
     created : Int;
     updated : Int;
   };
@@ -23,34 +29,53 @@ module Proposal {
     let proposal : Proposal = {
       title = title;
       description = description;
-      status = statusDraft;
+      status = #isDraft;
       owner = owner;
-      votingFinished = false;
       created = Int.abs(Time.now());
       updated = Int.abs(Time.now());
     };
     return proposal;
   };
 
-
-  public func makeDraft(proposal : Proposal, owner : Principal ) : Proposal {
+  public func makeDraft(proposal : Proposal) : Proposal {
     return {
       title = proposal.title;
       description = proposal.description;
-      status = statusDraft;
+      status = #isDraft;
       owner = proposal.owner;
-      votingFinished = false;
       created = proposal.created;
       updated = Int.abs(Time.now());
     };
 
   };
 
-  public func publish(proposal : Proposal, owner : Principal ) : Proposal {
+  public func publish(proposal : Proposal) : Proposal {
     return {
       title = proposal.title;
       description = proposal.description;
-      status = statusPublished;
+      status = #isPublished;
+      owner = proposal.owner;
+      created = proposal.created;
+      updated = Int.abs(Time.now());
+    };
+  };
+
+  public func finalize(proposal : Proposal ) : Proposal {
+    return {
+      title = proposal.title;
+      description = proposal.description;
+      status = #votingHasFinsihed;
+      owner = proposal.owner;
+      created = proposal.created;
+      updated = Int.abs(Time.now());
+    };
+  };
+
+  public func archive(proposal : Proposal) : Proposal {
+    return {
+      title = proposal.title;
+      description = proposal.description;
+      status = #isArchived;
       owner = proposal.owner;
       votingFinished = false;
       created = proposal.created;
@@ -58,25 +83,12 @@ module Proposal {
     };
   };
 
-  public func archive(proposal : Proposal, owner : Principal ) : Proposal {
-    return {
-      title = proposal.title;
-      description = proposal.description;
-      status = statusArchived;
-      owner = proposal.owner;
-      votingFinished = false;
-      created = proposal.created;
-      updated = Int.abs(Time.now());
-    };
-  };
-
-  public func update(proposal : Proposal, owner : Principal ) : Proposal {
+  public func update(proposal : Proposal) : Proposal {
     return {
       title = proposal.title;
       description = proposal.description;
       status = proposal.status;
       owner = proposal.owner;
-      votingFinished = false;
       created = proposal.created;
       updated = Int.abs(Time.now());
     };

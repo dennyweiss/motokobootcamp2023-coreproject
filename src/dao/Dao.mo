@@ -29,24 +29,18 @@ actor Dao {
   });
   environmentPrincipalGard.registerEnvironment({
     environmentType = #ic;
-    principals = [];
+    principals = ["4wtdz-zhyfn-46p4d-apw5i-weord-ktvsf-n4jge-qqsf6-ftski-i7fr3-pqe"];
   });
 
-  public shared ({ caller }) func setEnvironment(environmentName : Environment.EnvironmentType) : async () {
+  public shared ({ caller }) func setEnvironment(environmentName : Environment.EnvironmentType) : async Environment.EnvironmentType {
     assert (PrincipleTypeGuard.is(caller, #admin));
     environment := environmentName;
-    ();
-  };
-
-  public query func getEnvironment() : async Environment.EnvironmentType {
     environment;
   };
 
   //////////////////////////////////////////////////////////////////////////////
   // Proposal //////////////////////////////////////////////////////////////////
   type Proposal = Proposal.Proposal;
-
-  stable var proposalIdCount : Nat = 0;
   var proposals = HashMap.HashMap<Text, Proposal>(1, Text.equal, Text.hash);
 
   public query func getProposal(uuid : Text) : async ?Proposal {
@@ -74,15 +68,11 @@ actor Dao {
 
   public shared ({ caller }) func submitProposal(title : Text, description : Text) : async () {
     //1. auth
-
-    //2. Prepare data.
     let proposal = Proposal.create(title, description, caller);
-
-    //3. Create Proposal.
     proposals.put(await UUIDFactory.create(), proposal);
 
     //4. return confirmation.
-    ();
+    (); // @todo make use of meaningful Result
   };
 
   //////////////////////////////////////////////////////////////////////////////
@@ -109,12 +99,8 @@ actor Dao {
   //////////////////////////////////////////////////////////////////////////////
   // Utility ///////////////////////////////////////////////////////////////////
   public shared ({ caller }) func updateWebpageContent(content : Text) : async () {
-    assert (environmentPrincipalGard.isAccess(caller, environment, #allowed));
+    assert (PrincipleTypeGuard.is(caller, #admin));
     await Webpage.updateWebpageContent(content);
-  };
-
-  public func getContent() : async Text {
-    return await Webpage.getContent();
   };
 
   public shared ({ caller }) func accountId() : async {
@@ -127,6 +113,7 @@ actor Dao {
       account : Text;
     };
   } {
+    assert (PrincipleTypeGuard.is(caller, #admin));
     {
       principle = {
         id = Principal.toText(caller);
@@ -136,7 +123,7 @@ actor Dao {
         id = CanisterResolver.resolve(environment, #dao);
         account = AccountHelper.inspectAccount(Principal.fromText(CanisterResolver.resolve(environment, #dao)));
       };
-    };  
+    };
   };
 
   //////////////////////////////////////////////////////////////////////////////
@@ -148,7 +135,7 @@ actor Dao {
 
   let ledger : actor { icrc1_balance_of : (Account) -> async Tokens } = actor (ledgerCanisterId);
 
-  public shared ({ caller }) func get_balance() : async Nat {
+  public shared ({ caller }) func getBalance() : async Nat {
     let account = { owner = caller; subaccount = null };
     let amount = await ledger.icrc1_balance_of(account);
     return amount;
@@ -159,5 +146,4 @@ actor Dao {
   };
 
   // (record (principal "4wtdz-zhyfn-46p4d-apw5i-weord-ktvsf-n4jge-qqsf6-ftski-i7fr3-pqe")
-
 };

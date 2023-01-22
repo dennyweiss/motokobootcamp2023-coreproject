@@ -10,6 +10,9 @@ import EnvironmentGuards "../modules/guards/EnvironmentGuards";
 import PrincipleTypeGuard "../modules/guards/PrincipleTypeGuard";
 import Environment "../modules/Environment";
 import Http "Http";
+import HashTree "HashTree";
+import TempleRenderer "TempleRenderer";
+import CanisterResolver "../modules/CanisterResolver";
 
 actor Webpage {
   //////////////////////////////////////////////////////////////////////////////
@@ -18,20 +21,16 @@ actor Webpage {
   let environmentPrincipalGard = EnvironmentGuards.EnvironmentPrincipalGard();
   environmentPrincipalGard.registerEnvironment({
     environmentType = #local;
-    principals = ["rrkah-fqaaa-aaaaa-aaaaq-cai"];
+    principals = [CanisterResolver.resolve(#local, #dao)];
   });
   environmentPrincipalGard.registerEnvironment({
     environmentType = #ic;
-    principals = [];
+    principals = [CanisterResolver.resolve(#ic, #dao)];
   });
 
-  public shared ({ caller }) func setEnvironment(environmentName : Environment.EnvironmentType) : async () {
+  public shared ({ caller }) func setEnvironment(environmentName : Environment.EnvironmentType) : async Environment.EnvironmentType {
     assert (PrincipleTypeGuard.is(caller, #admin));
     environment := environmentName;
-    ();
-  };
-
-  public query func getEnvironment() : async Environment.EnvironmentType {
     environment;
   };
 
@@ -42,24 +41,27 @@ actor Webpage {
 
   public query func http_request(req : HttpRequest) : async HttpResponse {
     let response = {
-      body = Text.encodeUtf8(page_content);
-      headers = [];
+      body = pageContent;
+      headers = [
+        ("content-type", "text/html;charset=utf-8"),
+        HashTree.certification_header(pageContent),
+      ];
       status_code = 200 : Nat16;
       streaming_strategy = null;
     };
 
     return response;
   };
-
   //////////////////////////////////////////////////////////////////////////////
   // Dynamic Content ///////////////////////////////////////////////////////////
-  stable var page_content : Text = "Initial content";
-  public shared ({ caller }) func updateWebpageContent(new_page_content : Text) : async () {
+  stable var pageContent : Blob = TempleRenderer.render("Some initial content");
+  public shared ({ caller }) func updateWebpageContent(newPageContent : Text) : async () {
     assert (environmentPrincipalGard.isAccess(caller, environment, #allowed));
-    page_content := new_page_content;
+    pageContent := TempleRenderer.render(newPageContent);
   };
 
-  public query func getContent() : async Text {
-    return page_content;
+  public shared ({ caller }) func getContent() : async Blob {
+    assert (PrincipleTypeGuard.is(caller, #admin));
+    return pageContent;
   };
 };
