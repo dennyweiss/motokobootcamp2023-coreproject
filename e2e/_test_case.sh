@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-set -euo pipefail
-
 c_reset=$(echo -en '\033[0m')
 c_red=$(echo -en '\033[00;31m')
 c_lred=$(echo -en '\033[01;31m')
@@ -17,9 +15,11 @@ assert_equal () {
   local expected="${2}"
   local description="${3:-''}"
 
+  actual="$(echo -e "${actual}" | gsed -e 's/\x1b\[[0-9;]*m//g')"
+
   if [[ "${actual}" == "${expected}" ]]; then
     echo -en "${c_lgreen}"
-    echo -e  "[OK]:    ${c_reset}${description}"
+    echo -e "[OK]:     ${c_reset}${description}"
   else
     echo -en "${c_lred}"
     echo -e "[FAILED]: ${c_reset}${description}"

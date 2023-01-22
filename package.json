@@ -20,7 +20,8 @@
     "code:style:fix:motoko": "yarn pprettier --ignore-path=.eslintignore --write \"src/{dao,webpage}/*.mo\"",
     "code:analyse": "eslint  --ext .js --ext .vue --ext .yaml --ext .yml --ext .ts --ignore-path .eslintignore .",
     "code:analyse:fix": "eslint --ext .js --ext .vue --ext .yaml --ext .yml --ext .ts --ignore-path .eslintignore --fix .",
-    "code:test": "bin/run-tests"
+    "code:test": "bin/run-tests",
+    "code:test:e2e:canister": "e2e/./*.spec.sh"
   },
   "dependencies": {
     "@connect2ic/core": "^0.1.6",

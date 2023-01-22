@@ -18,7 +18,7 @@ actor Dao {
   let environmentPrincipalGard = EnvironmentGuards.EnvironmentPrincipalGard();
   environmentPrincipalGard.registerEnvironment({
     environmentType = #local;
-    principals = ["rrkah-fqaaa-aaaaa-aaaaq-cai"];
+    principals = ["4wtdz-zhyfn-46p4d-apw5i-weord-ktvsf-n4jge-qqsf6-ftski-i7fr3-pqe"];
   });
   environmentPrincipalGard.registerEnvironment({
     environmentType = #ic;
