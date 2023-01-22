@@ -31,7 +31,9 @@ actor Dao {
     ();
   };
 
-  public query func getEnvironment() : async Environment.EnvironmentType { environment; };
+  public query func getEnvironment() : async Environment.EnvironmentType {
+    environment;
+  };
 
   //////////////////////////////////////////////////////////////////////////////
   // Proposal //////////////////////////////////////////////////////////////////

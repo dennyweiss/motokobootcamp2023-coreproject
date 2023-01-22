@@ -16,8 +16,14 @@ actor Webpage {
   // Environment Guards ////////////////////////////////////////////////////////
   stable var environment : Environment.EnvironmentType = #local;
   let environmentPrincipalGard = EnvironmentGuards.EnvironmentPrincipalGard();
-  environmentPrincipalGard.registerEnvironment({ environmentType = #local; principals = ["rrkah-fqaaa-aaaaa-aaaaq-cai"]; });
-  environmentPrincipalGard.registerEnvironment({ environmentType = #ic; principals = []; });
+  environmentPrincipalGard.registerEnvironment({
+    environmentType = #local;
+    principals = ["rrkah-fqaaa-aaaaa-aaaaq-cai"];
+  });
+  environmentPrincipalGard.registerEnvironment({
+    environmentType = #ic;
+    principals = [];
+  });
 
   public shared ({ caller }) func setEnvironment(environmentName : Environment.EnvironmentType) : async () {
     assert (PrincipleTypeGuard.is(caller, #admin));
@@ -25,7 +31,9 @@ actor Webpage {
     ();
   };
 
-  public query func getEnvironment() : async Environment.EnvironmentType { environment; };
+  public query func getEnvironment() : async Environment.EnvironmentType {
+    environment;
+  };
 
   //////////////////////////////////////////////////////////////////////////////
   // HTTP Handler //////////////////////////////////////////////////////////////
@@ -47,7 +55,7 @@ actor Webpage {
   // Dynamic Content ///////////////////////////////////////////////////////////
   stable var page_content : Text = "Initial content";
   public shared ({ caller }) func updateWebpageContent(new_page_content : Text) : async () {
-    assert (environmentPrincipalGard.isAccess(caller, environment , #allowed));
+    assert (environmentPrincipalGard.isAccess(caller, environment, #allowed));
     page_content := new_page_content;
   };
 
