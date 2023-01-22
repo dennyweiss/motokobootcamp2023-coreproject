@@ -1,39 +1,37 @@
 import Webpage "canister:webpage";
-import Environment "../support/Environment";
 import Principal "mo:base/Principal";
-import PrincipleTypeGuard "../modules/guards/PrincipleTypeGuard";
-import Proposal "../modules/models/Proposal";
-import Vote "../modules/models/Vote";
 import HashMap "mo:base/HashMap";
 import Nat "mo:base/Nat";
 import Hash "mo:base/Hash";
 import Int "mo:base/Int";
 import Iter "mo:base/Iter";
+import EnvironmentGuards "../modules/guards/EnvironmentGuards";
+import PrincipleTypeGuard "../modules/guards/PrincipleTypeGuard";
+import Environment "../modules/Environment";
+import Proposal "../modules/models/Proposal";
+import Vote "../modules/models/Vote";
 
 actor Dao {
   //////////////////////////////////////////////////////////////////////////////
   // Environment Guards ////////////////////////////////////////////////////////
-  stable var environment : Text = "local";
-  let environments : [Environment.Environment] = [
-    {
-      name = "local";
-      principals = [
-        "rrkah-fqaaa-aaaaa-aaaaq-cai",
-      ];
-    },
-    { name = "ic"; principals = [] },
-  ];
-  let guard = Environment.PrincipalGuard(environments);
+  stable var environment : Environment.EnvironmentType = #local;
+  let environmentPrincipalGard = EnvironmentGuards.EnvironmentPrincipalGard();
+  environmentPrincipalGard.registerEnvironment({
+    environmentType = #local;
+    principals = ["rrkah-fqaaa-aaaaa-aaaaq-cai"];
+  });
+  environmentPrincipalGard.registerEnvironment({
+    environmentType = #ic;
+    principals = [];
+  });
 
-  public shared ({ caller }) func setEnvironment(environmentName : Text) : async () {
+  public shared ({ caller }) func setEnvironment(environmentName : Environment.EnvironmentType) : async () {
     assert (PrincipleTypeGuard.is(caller, #admin));
     environment := environmentName;
     ();
   };
 
-  public func getEnvironment() : async Text {
-    return environment;
-  };
+  public query func getEnvironment() : async Environment.EnvironmentType { environment; };
 
   //////////////////////////////////////////////////////////////////////////////
   // Proposal //////////////////////////////////////////////////////////////////
@@ -105,7 +103,7 @@ actor Dao {
   //////////////////////////////////////////////////////////////////////////////
   // Utility ///////////////////////////////////////////////////////////////////
   public shared ({ caller }) func updateWebpageContent(content : Text) : async () {
-    assert (environment == "local");
+    assert (environmentPrincipalGard.isAccess(caller, environment, #allowed));
     await Webpage.updateWebpageContent(content);
   };
 

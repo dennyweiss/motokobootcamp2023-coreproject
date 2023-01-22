@@ -1,39 +1,31 @@
-import Http "Http";
+import Bool "mo:base/Bool";
+import Buffer "mo:base/Buffer";
 import Text "mo:base/Text";
 import Debug "mo:base/Debug";
 import HashMap "mo:base/HashMap";
 import Array "mo:base/Array";
 import Result "mo:base/Result";
 import Principal "mo:base/Principal";
-import Environment "../support/Environment";
-import Bool "mo:base/Bool";
+import EnvironmentGuards "../modules/guards/EnvironmentGuards";
 import PrincipleTypeGuard "../modules/guards/PrincipleTypeGuard";
-import Buffer "mo:base/Buffer";
+import Environment "../modules/Environment";
+import Http "Http";
 
 actor Webpage {
   //////////////////////////////////////////////////////////////////////////////
   // Environment Guards ////////////////////////////////////////////////////////
-  stable var environment : Text = "local";
-  let environments : [Environment.Environment] = [
-    {
-      name = "local";
-      principals = [
-        "rrkah-fqaaa-aaaaa-aaaaq-cai",
-      ];
-    },
-    { name = "ic"; principals = [] },
-  ];
-  let guard = Environment.PrincipalGuard(environments);
+  stable var environment : Environment.EnvironmentType = #local;
+  let environmentPrincipalGard = EnvironmentGuards.EnvironmentPrincipalGard();
+  environmentPrincipalGard.registerEnvironment({ environmentType = #local; principals = ["rrkah-fqaaa-aaaaa-aaaaq-cai"]; });
+  environmentPrincipalGard.registerEnvironment({ environmentType = #ic; principals = []; });
 
-  public shared ({ caller }) func setEnvironment(environmentName : Text) : async () {
+  public shared ({ caller }) func setEnvironment(environmentName : Environment.EnvironmentType) : async () {
     assert (PrincipleTypeGuard.is(caller, #admin));
     environment := environmentName;
     ();
   };
 
-  public query func getEnvironment() : async Text {
-    return environment;
-  };
+  public query func getEnvironment() : async Environment.EnvironmentType { environment; };
 
   //////////////////////////////////////////////////////////////////////////////
   // HTTP Handler //////////////////////////////////////////////////////////////
@@ -55,7 +47,7 @@ actor Webpage {
   // Dynamic Content ///////////////////////////////////////////////////////////
   stable var page_content : Text = "Initial content";
   public shared ({ caller }) func updateWebpageContent(new_page_content : Text) : async () {
-    assert (guard.checkAccess(environment, Principal.toText(caller)) == #allowed);
+    assert (environmentPrincipalGard.isAccess(caller, environment , #allowed));
     page_content := new_page_content;
   };
 
