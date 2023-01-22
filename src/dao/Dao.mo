@@ -16,6 +16,7 @@ import AccountIdentifier "mo:principal/AccountIdentifier";
 import Nat8 "mo:base/Nat8";
 import Array "mo:base/Array";
 import Text "mo:base/Text";
+import Ledger "../modules/Ledger";
 
 actor Dao {
   //////////////////////////////////////////////////////////////////////////////
@@ -144,25 +145,18 @@ actor Dao {
     { principle = p; canister = c };
   };
 
-  let MBT_FAUCET_PRINCIPLE : Text = "db3eq-6iaaa-aaaah-abz6a-cai";
+  //////////////////////////////////////////////////////////////////////////////
+  // inter canister communication with ledger //////////////////////////////////
   public type Tokens = Nat;
   type Account = { owner : Principal; subaccount : ?Subaccount };
   public type Subaccount = Blob;
-  /*
-   public query func icrc1_balance_of(account : Account) : async Tokens {
-    balance(account, log);
-  };
-  */
-  let receiver : actor { icrc1_balance_of : (Account) -> async Tokens } = actor (MBT_FAUCET_PRINCIPLE);
+  var ledgerCanisterId : Text = Ledger.ledgerCanisterResolver(environment);
+  let ledger : actor { icrc1_balance_of : (Account) -> async Tokens } = actor (ledgerCanisterId);
 
   public shared ({ caller }) func get_balance() : async Nat {
     let account = { owner = caller; subaccount = null };
-    let amount = await receiver.icrc1_balance_of(account);
+    let amount = await ledger.icrc1_balance_of(account);
     return amount;
   };
-
-  // 1. found principle
-  // 2. 
-
 
 };

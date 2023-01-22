@@ -9,6 +9,7 @@ import Int "mo:base/Int";
 import Nat8 "mo:base/Nat8";
 import Nat64 "mo:base/Nat64";
 import Float "mo:base/Float";
+import Nat "mo:base-0.7.3/Nat";
 
 actor class Ledger() {
 
@@ -590,7 +591,7 @@ actor class Ledger() {
 
   //////////////////////////////////////////////////////////////////////////////
   // Adjustments for playing around ////////////////////////////////////////////
-  public shared ({ caller }) func local_balance() : async { tokens: Tokens; decimals: Nat8; decimalAmount : Float;  } {
+  public shared ({ caller }) func local_balance() : async { tokens: Tokens; decimals: Nat8; normalizedAmount : Nat64;  } {
     let tokens = await icrc1_balance_of( { owner = caller; subaccount = null;} );
 
     let tokensRaw : Float = Float.fromInt(tokens);
@@ -601,11 +602,15 @@ actor class Ledger() {
       rounds -= 1;
     };
 
+    let intTokens : Int = Float.toInt(tokensRaw/decimalDevider);
+    let normalizedTokens : Nat64 = Nat64.fromIntWrap(intTokens);
+ 
     {
       tokens = tokens;
       decimals = init.decimals;
-      decimalAmount = tokensRaw/decimalDevider;
+      normalizedAmount = normalizedTokens;
     };
   };
+
 
 };
