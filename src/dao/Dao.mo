@@ -10,6 +10,12 @@ import PrincipleTypeGuard "../modules/guards/PrincipleTypeGuard";
 import Environment "../modules/Environment";
 import Proposal "../modules/models/Proposal";
 import Vote "../modules/models/Vote";
+import Debug "mo:base/Debug";
+import Result "mo:base/Result";
+import AccountIdentifier "mo:principal/AccountIdentifier";
+import Nat8 "mo:base/Nat8";
+import Array "mo:base/Array";
+import Text "mo:base/Text";
 
 actor Dao {
   //////////////////////////////////////////////////////////////////////////////
@@ -111,6 +117,23 @@ actor Dao {
 
   public func getContent() : async Text {
     return await Webpage.getContent();
+  };
+
+  func inspectAccount(principal : Principal) : () {
+    let accountIdentifier : [Nat8] = AccountIdentifier.fromPrincipal(principal, null);
+    Debug.print(debug_show(accountIdentifier));
+    let accountIdentifierText : [Text] = Array.map<Nat8,Text>(accountIdentifier, func(item) {
+      Nat8.toText(item);
+    });
+    Debug.print(debug_show(Text.join("", accountIdentifierText.vals())));
+    ();    
+  };
+
+  public shared ({ caller }) func accountId() : async () {
+    inspectAccount(caller);
+    Debug.print(debug_show("----------------"));
+    inspectAccount(Principal.fromText("rrkah-fqaaa-aaaaa-aaaaq-cai"));
+    ();
   };
 
 };
