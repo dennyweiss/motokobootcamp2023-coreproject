@@ -18,6 +18,7 @@ import CanisterResolver "../modules/CanisterResolver";
 import AccountHelper "../modules/AccountHelper";
 import UUIDFactory "../modules/UUIDFactory";
 import Ledger "../modules/Ledger";
+import VotingPower "../modules/VotingPower";
 
 actor Dao {
   //////////////////////////////////////////////////////////////////////////////
@@ -68,8 +69,7 @@ actor Dao {
   ) : async Result.Result<(), Text> {
     let account = { owner = caller; subaccount = null };
     let mbTokenBalance : Ledger.Tokens = await Ledger.createActor(environment).icrc1_balance_of(account);
-    Debug.print(debug_show({ current : Nat = mbTokenBalance; minimal : Nat = Ledger.minimalTokenBalance }));
-    if (mbTokenBalance > Ledger.minimalTokenBalance) {
+    if (VotingPower.hasMinimalVotingPowerFromTokens(mbTokenBalance)) {
       let proposal = Proposal.create(
         title,
         description,
@@ -77,7 +77,7 @@ actor Dao {
         caller,
       );
       proposals.put(await UUIDFactory.create(), proposal);
-      Debug.print(debug_show(proposal));
+      Debug.print(debug_show(VotingPower.normalizedFromTokens(mbTokenBalance)));
       #ok();
     } else {
       #err("Proposal account has insufficient funds to transfer " # Nat.toText(mbTokenBalance) );
