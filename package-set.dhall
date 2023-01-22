@@ -31,6 +31,16 @@ let additions = [
   , version = "v0.2.6"
   , dependencies = [ "array", "base-0.7.3", "crypto", "encoding", "hash" ]
   },
+  { name = "uuid"
+  , repo = "https://github.com/aviate-labs/uuid.mo"
+  , version = "v0.2.1"
+  , dependencies = [ "array", "base-0.7.3", "crypto", "encoding", "hash", "io" ]
+  },
+  { name = "io"
+  , version = "v0.3.2"
+  , repo = "https://github.com/aviate-labs/io.mo"
+  , dependencies = [ "base-0.7.3" ]
+  },
 ]
 
 in  upstream # icbase # icos # additions # additions

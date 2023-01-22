@@ -16,7 +16,7 @@ import AccountIdentifier "mo:principal/AccountIdentifier";
 import Text "mo:base/Text";
 import CanisterResolver "../modules/CanisterResolver";
 import AccountHelper "../modules/AccountHelper";
-
+import UUIDFactory "../modules/UUIDFactory";
 
 actor Dao {
   //////////////////////////////////////////////////////////////////////////////
@@ -47,26 +47,26 @@ actor Dao {
   type Proposal = Proposal.Proposal;
 
   stable var proposalIdCount : Nat = 0;
-  var proposals = HashMap.HashMap<Int, Proposal>(1, Int.equal, Int.hash);
+  var proposals = HashMap.HashMap<Text, Proposal>(1, Text.equal, Text.hash);
 
-  public query func getProposal(id : Int) : async ?Proposal {
+  public query func getProposal(uuid : Text) : async ?Proposal {
     // 1. Auth
 
     //2. Query data.
-    let proposal : ?Proposal = proposals.get(id);
+    let proposal : ?Proposal = proposals.get(uuid);
 
     //3. Return requested Post or null.
     proposal;
   };
 
-  public query func getAllProposals() : async [(Int, Proposal)] {
+  public query func getAllProposals() : async [(Text, Proposal)] {
     //1. authenticate
 
     //2. Hashmap to Iter.
-    let proposalIter : Iter.Iter<(Int, Proposal)> = proposals.entries();
+    let proposalIter : Iter.Iter<(Text, Proposal)> = proposals.entries();
 
     //3. Iter to Array.
-    let proposalArray : [(Int, Proposal)] = Iter.toArray(proposalIter);
+    let proposalArray : [(Text, Proposal)] = Iter.toArray(proposalIter);
 
     //4. Iter to Array.
     proposalArray;
@@ -76,16 +76,13 @@ actor Dao {
     //1. auth
 
     //2. Prepare data.
-    let id : Nat = proposalIdCount;
-    proposalIdCount += 1;
     let proposal = Proposal.create(title, description, caller);
 
     //3. Create Proposal.
-    proposals.put(id, proposal);
+    proposals.put(await UUIDFactory.create(), proposal);
 
     //4. return confirmation.
     ();
-
   };
 
   //////////////////////////////////////////////////////////////////////////////
