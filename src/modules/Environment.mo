@@ -1,7 +1,7 @@
 module Environment {
   public type EnvironmentType = {
     #local;
-    #staging;
+    // #staging;
     #ic; // production
   };
 }

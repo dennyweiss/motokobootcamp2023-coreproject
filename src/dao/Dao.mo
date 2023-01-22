@@ -13,10 +13,10 @@ import Vote "../modules/models/Vote";
 import Debug "mo:base/Debug";
 import Result "mo:base/Result";
 import AccountIdentifier "mo:principal/AccountIdentifier";
-import Nat8 "mo:base/Nat8";
-import Array "mo:base/Array";
 import Text "mo:base/Text";
-import Ledger "../modules/Ledger";
+import CanisterResolver "../modules/CanisterResolver";
+import AccountHelper "../modules/AccountHelper";
+
 
 actor Dao {
   //////////////////////////////////////////////////////////////////////////////
@@ -120,29 +120,26 @@ actor Dao {
     return await Webpage.getContent();
   };
 
-  func inspectAccount(principal : Principal) : Text {
-    let accountIdentifier : [Nat8] = AccountIdentifier.fromPrincipal(principal, null);
-    Debug.print(debug_show (accountIdentifier));
-    let accountIdentifierText : [Text] = Array.map<Nat8, Text>(
-      accountIdentifier,
-      func(item) {
-        Nat8.toText(item);
-      },
-    );
-    let accountIdentifierString : Text = Text.join("", accountIdentifierText.vals());
-    Debug.print(debug_show (accountIdentifierString));
-    accountIdentifierString;
-  };
-
   public shared ({ caller }) func accountId() : async {
-    principle : Text;
-    canister : Text;
+    principle : {
+      id : Text;
+      account : Text;
+    };
+    canister : {
+      id : Text;
+      account : Text;
+    };
   } {
-    let p : Text = inspectAccount(caller);
-    Debug.print(debug_show ("----------------"));
-    let c = inspectAccount(Principal.fromText("a4gq6-oaaaa-aaaab-qaa4q-cai"));
-
-    { principle = p; canister = c };
+    {
+      principle = {
+        id = Principal.toText(caller);
+        account = AccountHelper.inspectAccount(caller);
+      };
+      canister = {
+        id = CanisterResolver.resolve(environment, #dao);
+        account = AccountHelper.inspectAccount(Principal.fromText(CanisterResolver.resolve(environment, #dao)));
+      };
+    };  
   };
 
   //////////////////////////////////////////////////////////////////////////////
@@ -150,7 +147,8 @@ actor Dao {
   public type Tokens = Nat;
   type Account = { owner : Principal; subaccount : ?Subaccount };
   public type Subaccount = Blob;
-  var ledgerCanisterId : Text = Ledger.ledgerCanisterResolver(environment);
+  var ledgerCanisterId : Text = CanisterResolver.resolve(environment, #ledger);
+
   let ledger : actor { icrc1_balance_of : (Account) -> async Tokens } = actor (ledgerCanisterId);
 
   public shared ({ caller }) func get_balance() : async Nat {
@@ -158,5 +156,11 @@ actor Dao {
     let amount = await ledger.icrc1_balance_of(account);
     return amount;
   };
+
+  public shared ({ caller }) func getPrincipal() : async Principal {
+    caller;
+  };
+
+  // (record (principal "4wtdz-zhyfn-46p4d-apw5i-weord-ktvsf-n4jge-qqsf6-ftski-i7fr3-pqe")
 
 };
