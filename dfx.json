@@ -9,6 +9,10 @@
       "type": "motoko",
       "dependencies": ["webpage"]
     },
+    "icrc1": {
+      "main": "./src/icrc1/ICRC1.mo",
+      "type": "motoko"
+    },
     "interface": {
       "dependencies": ["webpage", "dao"],
       "frontend": {

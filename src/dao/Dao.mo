@@ -119,21 +119,50 @@ actor Dao {
     return await Webpage.getContent();
   };
 
-  func inspectAccount(principal : Principal) : () {
+  func inspectAccount(principal : Principal) : Text {
     let accountIdentifier : [Nat8] = AccountIdentifier.fromPrincipal(principal, null);
-    Debug.print(debug_show(accountIdentifier));
-    let accountIdentifierText : [Text] = Array.map<Nat8,Text>(accountIdentifier, func(item) {
-      Nat8.toText(item);
-    });
-    Debug.print(debug_show(Text.join("", accountIdentifierText.vals())));
-    ();    
+    Debug.print(debug_show (accountIdentifier));
+    let accountIdentifierText : [Text] = Array.map<Nat8, Text>(
+      accountIdentifier,
+      func(item) {
+        Nat8.toText(item);
+      },
+    );
+    let accountIdentifierString : Text = Text.join("", accountIdentifierText.vals());
+    Debug.print(debug_show (accountIdentifierString));
+    accountIdentifierString;
   };
 
-  public shared ({ caller }) func accountId() : async () {
-    inspectAccount(caller);
-    Debug.print(debug_show("----------------"));
-    inspectAccount(Principal.fromText("rrkah-fqaaa-aaaaa-aaaaq-cai"));
-    ();
+  public shared ({ caller }) func accountId() : async {
+    principle : Text;
+    canister : Text;
+  } {
+    let p : Text = inspectAccount(caller);
+    Debug.print(debug_show ("----------------"));
+    let c = inspectAccount(Principal.fromText("a4gq6-oaaaa-aaaab-qaa4q-cai"));
+
+    { principle = p; canister = c };
   };
+
+  let MBT_FAUCET_PRINCIPLE : Text = "db3eq-6iaaa-aaaah-abz6a-cai";
+  public type Tokens = Nat;
+  type Account = { owner : Principal; subaccount : ?Subaccount };
+  public type Subaccount = Blob;
+  /*
+   public query func icrc1_balance_of(account : Account) : async Tokens {
+    balance(account, log);
+  };
+  */
+  let receiver : actor { icrc1_balance_of : (Account) -> async Tokens } = actor (MBT_FAUCET_PRINCIPLE);
+
+  public shared ({ caller }) func get_balance() : async Nat {
+    let account = { owner = caller; subaccount = null };
+    let amount = await receiver.icrc1_balance_of(account);
+    return amount;
+  };
+
+  // 1. found principle
+  // 2. 
+
 
 };
