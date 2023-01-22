@@ -8,8 +8,9 @@ import Time "mo:base/Time";
 import Int "mo:base/Int";
 import Nat8 "mo:base/Nat8";
 import Nat64 "mo:base/Nat64";
+import Float "mo:base/Float";
 
-actor class Ledger(init : { initial_mints : [{ account : { owner : Principal; subaccount : ?Blob }; amount : Nat }]; minting_account : { owner : Principal; subaccount : ?Blob }; token_name : Text; token_symbol : Text; decimals : Nat8; transfer_fee : Nat }) = this {
+actor class Ledger() {
 
   public type Account = { owner : Principal; subaccount : ?Subaccount };
   public type Subaccount = Blob;
@@ -21,6 +22,19 @@ actor class Ledger(init : { initial_mints : [{ account : { owner : Principal; su
   public type TxLog = Buffer.Buffer<Transaction>;
 
   public type Value = { #Nat : Nat; #Int : Int; #Blob : Blob; #Text : Text };
+
+  let minitingAccount : Principal = Principal.fromText("5m3tu-nosn3-v3z4m-fakpj-hqcry-coizo-v27x5-2ymrh-d7qi5-f6mll-bae");
+  let init = {
+    initial_mints = [{
+      account : Account = { owner = minitingAccount; subaccount = null };
+      amount : Nat = 1000000000000000;
+    }];
+    minting_account : Account = { owner = minitingAccount; subaccount = null };
+    token_name : Text = "Motoko Bootcamp Token";
+    token_symbol : Text = "MB";
+    decimals : Nat8 = 8;
+    transfer_fee : Nat = 1000000;
+  };
 
   let permittedDriftNanos : Duration = 60_000_000_000;
   let transactionWindowNanos : Duration = 24 * 60 * 60 * 1_000_000_000;
@@ -393,6 +407,24 @@ actor class Ledger(init : { initial_mints : [{ account : { owner : Principal; su
       memo = memo;
       created_at_time = created_at_time;
     });
+  };
+
+  public shared ({ caller }) func local_balance() : async { tokens: Tokens; decimals: Nat8; decimalAmount : Float;  } {
+    let tokens = await icrc1_balance_of( { owner = caller; subaccount = null;} );
+
+    let tokensRaw : Float = Float.fromInt(tokens);
+    var decimalDevider : Float = 1.0; 
+    var rounds = 8;
+    while( rounds > 0 ) {
+      decimalDevider *= 10.0;
+      rounds -= 1;
+    };
+
+    {
+      tokens = tokens;
+      decimals = init.decimals;
+      decimalAmount = tokensRaw/decimalDevider;
+    };
   };
 
   public query func icrc1_balance_of(account : Account) : async Tokens {
