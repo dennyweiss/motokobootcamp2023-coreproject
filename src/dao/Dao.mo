@@ -17,6 +17,7 @@ import Text "mo:base/Text";
 import CanisterResolver "../modules/CanisterResolver";
 import AccountHelper "../modules/AccountHelper";
 import UUIDFactory "../modules/UUIDFactory";
+import Ledger "../modules/Ledger";
 
 actor Dao {
   //////////////////////////////////////////////////////////////////////////////
@@ -64,20 +65,23 @@ actor Dao {
     title : Text,
     description : Text,
     payload : Text,
-  ) : async () {
-    // check caller has MB token
-
-
-    let proposal = Proposal.create(
-      title, 
-      description, 
-      payload, 
-      caller
-    );
-    proposals.put(await UUIDFactory.create(), proposal);
-
-    //4. return confirmation.
-    (); // @todo make use of meaningful Result
+  ) : async Result.Result<(), Text> {
+    let account = { owner = caller; subaccount = null };
+    let mbTokenBalance : Ledger.Tokens = await Ledger.createActor(environment).icrc1_balance_of(account);
+    Debug.print(debug_show({ current : Nat = mbTokenBalance; minimal : Nat = Ledger.minimalTokenBalance }));
+    if (mbTokenBalance > Ledger.minimalTokenBalance) {
+      let proposal = Proposal.create(
+        title,
+        description,
+        payload,
+        caller,
+      );
+      proposals.put(await UUIDFactory.create(), proposal);
+      Debug.print(debug_show(proposal));
+      #ok();
+    } else {
+      #err("Proposal account has insufficient funds to transfer " # Nat.toText(mbTokenBalance) );
+    };
   };
 
   //////////////////////////////////////////////////////////////////////////////
@@ -108,52 +112,11 @@ actor Dao {
     await Webpage.updateWebpageContent(content);
   };
 
-  public shared ({ caller }) func accountId() : async {
-    principle : {
-      id : Text;
-      account : Text;
-    };
-    canister : {
-      id : Text;
-      account : Text;
-    };
-  } {
-    assert (PrincipleTypeGuard.is(caller, #admin));
-    {
-      principle = {
-        id = Principal.toText(caller);
-        account = AccountHelper.inspectAccount(caller);
-      };
-      canister = {
-        id = CanisterResolver.resolve(environment, #dao);
-        account = AccountHelper.inspectAccount(Principal.fromText(CanisterResolver.resolve(environment, #dao)));
-      };
-    };
-  };
-
-  // actorFactory <- @todo factor out this thing
-  public type Tokens = Nat;
-  public type Subaccount = Blob;
-  type Account = { owner : Principal; subaccount : ?Subaccount };
-  type Ledger = actor { icrc1_balance_of : (Account) -> async Tokens };
-
-  func createLedgerActor(environment: Environment.EnvironmentType): Ledger {
-    var ledgerCanisterId : Text = CanisterResolver.resolve(environment, #ledger);
-    actor (ledgerCanisterId);
-  };
-
   //////////////////////////////////////////////////////////////////////////////
   // inter canister communication with ledger //////////////////////////////////
-  public shared ({ caller }) func getBalance() : async Nat {
+  public shared ({ caller }) func getBalance() : async Ledger.Tokens {
     let account = { owner = caller; subaccount = null };
-    let amount = await createLedgerActor(environment).icrc1_balance_of(account);
-    return amount;
+    return await Ledger.createActor(environment).icrc1_balance_of(account);
   };
 
-  public shared ({ caller }) func getPrincipal() : async Principal {
-    caller;
-  };
-
-  // (record (principal "4wtdz-zhyfn-46p4d-apw5i-weord-ktvsf-n4jge-qqsf6-ftski-i7fr3-pqe")
-  // (record (principal "5m3tu-nosn3-v3z4m-fakpj-hqcry-coizo-v27x5-2ymrh-d7qi5-f6mll-bae")) <- Minter
 };
