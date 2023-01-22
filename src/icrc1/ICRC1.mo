@@ -409,24 +409,6 @@ actor class Ledger() {
     });
   };
 
-  public shared ({ caller }) func local_balance() : async { tokens: Tokens; decimals: Nat8; decimalAmount : Float;  } {
-    let tokens = await icrc1_balance_of( { owner = caller; subaccount = null;} );
-
-    let tokensRaw : Float = Float.fromInt(tokens);
-    var decimalDevider : Float = 1.0; 
-    var rounds = 8;
-    while( rounds > 0 ) {
-      decimalDevider *= 10.0;
-      rounds -= 1;
-    };
-
-    {
-      tokens = tokens;
-      decimals = init.decimals;
-      decimalAmount = tokensRaw/decimalDevider;
-    };
-  };
-
   public query func icrc1_balance_of(account : Account) : async Tokens {
     balance(account, log);
   };
@@ -605,4 +587,25 @@ actor class Ledger() {
   public query func icrc2_allowance({ account : Account; spender : Principal }) : async Allowance {
     allowance(account, spender, Nat64.fromNat(Int.abs(Time.now())));
   };
+
+  //////////////////////////////////////////////////////////////////////////////
+  // Adjustments for playing around ////////////////////////////////////////////
+  public shared ({ caller }) func local_balance() : async { tokens: Tokens; decimals: Nat8; decimalAmount : Float;  } {
+    let tokens = await icrc1_balance_of( { owner = caller; subaccount = null;} );
+
+    let tokensRaw : Float = Float.fromInt(tokens);
+    var decimalDevider : Float = 1.0;
+    var rounds = 8;
+    while( rounds > 0 ) {
+      decimalDevider *= 10.0;
+      rounds -= 1;
+    };
+
+    {
+      tokens = tokens;
+      decimals = init.decimals;
+      decimalAmount = tokensRaw/decimalDevider;
+    };
+  };
+
 };
