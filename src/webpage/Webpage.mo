@@ -7,7 +7,7 @@ import Result "mo:base/Result";
 import Principal "mo:base/Principal";
 import Environment "../support/Environment";
 import Bool "mo:base/Bool";
-import Admin "../modules/guards/Admin";
+import PrincipleTypeGuard "../modules/guards/PrincipleTypeGuard";
 import Buffer "mo:base/Buffer";
 
 actor Webpage {
@@ -26,12 +26,12 @@ actor Webpage {
   let guard = Environment.PrincipalGuard(environments);
 
   public shared ({ caller }) func setEnvironment(environmentName : Text) : async () {
-    assert (Admin.isAdmin(caller));
+    assert (PrincipleTypeGuard.is(caller, #admin));
     environment := environmentName;
     ();
   };
 
-  public func getEnvironment() : async Text {
+  public query func getEnvironment() : async Text {
     return environment;
   };
 

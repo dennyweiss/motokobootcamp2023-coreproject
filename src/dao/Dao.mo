@@ -1,7 +1,7 @@
 import Webpage "canister:webpage";
 import Environment "../support/Environment";
 import Principal "mo:base/Principal";
-import Admin "../modules/guards/Admin";
+import PrincipleTypeGuard "../modules/guards/PrincipleTypeGuard";
 import Proposal "../modules/models/Proposal";
 import Vote "../modules/models/Vote";
 import HashMap "mo:base/HashMap";
@@ -26,7 +26,7 @@ actor Dao {
   let guard = Environment.PrincipalGuard(environments);
 
   public shared ({ caller }) func setEnvironment(environmentName : Text) : async () {
-    assert (Admin.isAdmin(caller));
+    assert (PrincipleTypeGuard.is(caller, #admin));
     environment := environmentName;
     ();
   };
