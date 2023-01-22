@@ -58,10 +58,20 @@ actor Webpage {
   public shared ({ caller }) func updateWebpageContent(newPageContent : Text) : async () {
     assert (environmentPrincipalGard.isAccess(caller, environment, #allowed));
     pageContent := TempleRenderer.render(newPageContent);
+    updateVerifiedVariables();
   };
 
   public shared ({ caller }) func getContent() : async Blob {
     assert (PrincipleTypeGuard.is(caller, #admin));
     return pageContent;
   };
+
+  system func postupgrade() {
+    updateVerifiedVariables();
+  };
+
+  func updateVerifiedVariables() {
+    HashTree.update_asset_hash(pageContent);
+  };
+
 };
