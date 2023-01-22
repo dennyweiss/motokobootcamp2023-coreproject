@@ -1,14 +1,14 @@
 import Webpage "canister:webpage";
 import Environment "../support/Environment";
 import Principal "mo:base/Principal";
-import Admin "../support/Admin";
-import Proposal "../support/Proposal";
+import Admin "../modules/guards/Admin";
+import Proposal "../modules/models/Proposal";
+import Vote "../modules/models/Vote";
 import HashMap "mo:base/HashMap";
 import Nat "mo:base/Nat";
 import Hash "mo:base/Hash";
 import Int "mo:base/Int";
 import Iter "mo:base/Iter";
-import Vote "../support/Vote";
 
 actor Dao {
   //////////////////////////////////////////////////////////////////////////////

@@ -7,7 +7,7 @@ import Result "mo:base/Result";
 import Principal "mo:base/Principal";
 import Environment "../support/Environment";
 import Bool "mo:base/Bool";
-import Admin "../support/Admin";
+import Admin "../modules/guards/Admin";
 import Buffer "mo:base/Buffer";
 
 actor Webpage {

@@ -9,7 +9,6 @@ module Admin {
   };
 
   public func isAdmin(principal : Principal) : Bool {
-
     return switch (Array.find<Principal>(adminList(), func(x) { x == principal })) {
       case (?a) true;
       case _ false;
