@@ -5,10 +5,6 @@ import Int "mo:base/Int";
 
 module Proposal {
 
-  let statusDraft = "isDraft";
-  let statusPublished = "isPublished";
-  let statusArchived = "isArchived";
-
   public type ProposalStatus = {
     #isDraft;
     #isPublished;
@@ -19,16 +15,23 @@ module Proposal {
  public type Proposal = {
     title : Text;
     description : Text;
+    payload: Text;
     status : ProposalStatus;
     owner : Principal;
     created : Int;
     updated : Int;
   };
 
-  public func create( title : Text, description : Text, owner : Principal ) : Proposal {
+  public func create( 
+    title : Text, 
+    description : Text, 
+    payload : Text ,
+    owner : Principal, 
+  ) : Proposal {
     let proposal : Proposal = {
       title = title;
       description = description;
+      payload = payload;
       status = #isDraft;
       owner = owner;
       created = Int.abs(Time.now());
@@ -41,6 +44,7 @@ module Proposal {
     return {
       title = proposal.title;
       description = proposal.description;
+      payload = proposal.payload;
       status = #isDraft;
       owner = proposal.owner;
       created = proposal.created;
@@ -53,6 +57,7 @@ module Proposal {
     return {
       title = proposal.title;
       description = proposal.description;
+      payload = proposal.payload;
       status = #isPublished;
       owner = proposal.owner;
       created = proposal.created;
@@ -64,6 +69,7 @@ module Proposal {
     return {
       title = proposal.title;
       description = proposal.description;
+      payload = proposal.payload;
       status = #votingHasFinsihed;
       owner = proposal.owner;
       created = proposal.created;
@@ -75,6 +81,7 @@ module Proposal {
     return {
       title = proposal.title;
       description = proposal.description;
+      payload = proposal.payload;
       status = #isArchived;
       owner = proposal.owner;
       votingFinished = false;
@@ -87,6 +94,7 @@ module Proposal {
     return {
       title = proposal.title;
       description = proposal.description;
+      payload = proposal.payload;
       status = proposal.status;
       owner = proposal.owner;
       created = proposal.created;

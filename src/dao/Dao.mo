@@ -45,30 +45,35 @@ actor Dao {
 
   public query func getProposal(uuid : Text) : async ?Proposal {
     // 1. Auth
-
     //2. Query data.
     let proposal : ?Proposal = proposals.get(uuid);
-
-    //3. Return requested Post or null.
     proposal;
   };
 
   public query func getAllProposals() : async [(Text, Proposal)] {
     //1. authenticate
-
     //2. Hashmap to Iter.
     let proposalIter : Iter.Iter<(Text, Proposal)> = proposals.entries();
-
     //3. Iter to Array.
     let proposalArray : [(Text, Proposal)] = Iter.toArray(proposalIter);
-
     //4. Iter to Array.
     proposalArray;
   };
 
-  public shared ({ caller }) func submitProposal(title : Text, description : Text) : async () {
-    //1. auth
-    let proposal = Proposal.create(title, description, caller);
+  public shared ({ caller }) func submitProposal(
+    title : Text,
+    description : Text,
+    payload : Text,
+  ) : async () {
+    // check caller has MB token
+
+
+    let proposal = Proposal.create(
+      title, 
+      description, 
+      payload, 
+      caller
+    );
     proposals.put(await UUIDFactory.create(), proposal);
 
     //4. return confirmation.
@@ -126,18 +131,22 @@ actor Dao {
     };
   };
 
+  // actorFactory <- @todo factor out this thing
+  public type Tokens = Nat;
+  public type Subaccount = Blob;
+  type Account = { owner : Principal; subaccount : ?Subaccount };
+  type Ledger = actor { icrc1_balance_of : (Account) -> async Tokens };
+
+  func createLedgerActor(environment: Environment.EnvironmentType): Ledger {
+    var ledgerCanisterId : Text = CanisterResolver.resolve(environment, #ledger);
+    actor (ledgerCanisterId);
+  };
+
   //////////////////////////////////////////////////////////////////////////////
   // inter canister communication with ledger //////////////////////////////////
-  public type Tokens = Nat;
-  type Account = { owner : Principal; subaccount : ?Subaccount };
-  public type Subaccount = Blob;
-  var ledgerCanisterId : Text = CanisterResolver.resolve(environment, #ledger);
-
-  let ledger : actor { icrc1_balance_of : (Account) -> async Tokens } = actor (ledgerCanisterId);
-
   public shared ({ caller }) func getBalance() : async Nat {
     let account = { owner = caller; subaccount = null };
-    let amount = await ledger.icrc1_balance_of(account);
+    let amount = await createLedgerActor(environment).icrc1_balance_of(account);
     return amount;
   };
 
@@ -146,4 +155,5 @@ actor Dao {
   };
 
   // (record (principal "4wtdz-zhyfn-46p4d-apw5i-weord-ktvsf-n4jge-qqsf6-ftski-i7fr3-pqe")
+  // (record (principal "5m3tu-nosn3-v3z4m-fakpj-hqcry-coizo-v27x5-2ymrh-d7qi5-f6mll-bae")) <- Minter
 };

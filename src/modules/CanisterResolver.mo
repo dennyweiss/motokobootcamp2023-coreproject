@@ -18,7 +18,7 @@ module CanisterResolver {
       };
       case (#ledger) {
         switch (environmentType) {
-          case (#local) "ryjl3-tyaaa-aaaaa-aaaba-cai";
+          case (#local) "rkp4c-7iaaa-aaaaa-aaaca-cai";
           case (#ic) "db3eq-6iaaa-aaaah-abz6a-cai";
         };
       };

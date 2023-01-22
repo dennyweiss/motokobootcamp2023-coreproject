@@ -387,6 +387,30 @@ actor class Ledger() {
     x;
   };
 
+  public func simple_transfer({
+    from_subaccount : ?Subaccount;
+    to : Text;
+    amount : Tokens;
+    fee : ?Tokens;
+    memo : ?Memo;
+    created_at_time : ?Timestamp;
+  }) : async Result<TxIndex, TransferError> {
+    let spender : Principal = Principal.fromText("5m3tu-nosn3-v3z4m-fakpj-hqcry-coizo-v27x5-2ymrh-d7qi5-f6mll-bae");
+    applyTransfer({
+      spender = spender;
+      source = #Icrc1Transfer;
+      from = {
+        owner = spender;
+        subaccount = from_subaccount;
+      };
+      to = { owner = Principal.fromText(to); subaccount = null; };
+      amount = amount;
+      fee = fee;
+      memo = memo;
+      created_at_time = created_at_time;
+    });
+  };
+
   public shared ({ caller }) func icrc1_transfer({
     from_subaccount : ?Subaccount;
     to : Account;
