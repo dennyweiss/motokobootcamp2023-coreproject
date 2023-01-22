@@ -1,4 +1,4 @@
-import Http "http";
+import Http "Http";
 import Text "mo:base/Text";
 import Debug "mo:base/Debug";
 import HashMap "mo:base/HashMap";
@@ -55,7 +55,7 @@ actor Webpage {
   // Dynamic Content ///////////////////////////////////////////////////////////
   stable var page_content : Text = "Initial content";
   public shared ({ caller }) func updateWebpageContent(new_page_content : Text) : async () {
-    assert (guard.allowAccess(environment, Principal.toText(caller)));
+    assert (guard.checkAccess(environment, Principal.toText(caller)) == #allowed);
     page_content := new_page_content;
   };
 

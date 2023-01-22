@@ -8,12 +8,17 @@ module Environment {
     principals : [Text];
   };
 
+  public type Access = {
+    #allowed;
+    #denied;
+  };
+
   public class PrincipalGuard(
     environments : [Environment],
   ) {
     let _environments = environments;
 
-    public func allowAccess(environment : Text, principal : Text) : Bool {
+    public func checkAccess(environment : Text, principal : Text) : Access {
       func findEnvironment(item : Environment) : Bool {
         environment == item.name;
       };
@@ -31,8 +36,8 @@ module Environment {
       return switch (
         Array.find<Text>(supportedPrinciples, func(x) { Text.equal(x, principal) }),
       ) {
-        case (?a) true;
-        case _ false;
+        case (?a) #allowed;
+        case _ #denied;
       };
 
     };

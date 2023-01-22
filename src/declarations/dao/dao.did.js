@@ -1,22 +1,26 @@
 export const idlFactory = ({ IDL }) => {
-  const Proposal = IDL.Record({});
+  const Proposal = IDL.Record({
+    'status' : IDL.Text,
+    'title' : IDL.Text,
+    'created' : IDL.Int,
+    'owner' : IDL.Principal,
+    'description' : IDL.Text,
+    'votingFinished' : IDL.Bool,
+    'updated' : IDL.Int,
+  });
   return IDL.Service({
-    'get_all_proposals' : IDL.Func(
+    'getAllProposals' : IDL.Func(
         [],
         [IDL.Vec(IDL.Tuple(IDL.Int, Proposal))],
         ['query'],
       ),
-    'get_proposal' : IDL.Func([IDL.Int], [IDL.Opt(Proposal)], ['query']),
-    'submit_proposal' : IDL.Func(
-        [IDL.Text],
-        [IDL.Variant({ 'Ok' : Proposal, 'Err' : IDL.Text })],
-        [],
-      ),
-    'vote' : IDL.Func(
-        [IDL.Int, IDL.Bool],
-        [IDL.Variant({ 'Ok' : IDL.Tuple(IDL.Nat, IDL.Nat), 'Err' : IDL.Text })],
-        [],
-      ),
+    'getContent' : IDL.Func([], [IDL.Text], []),
+    'getEnvironment' : IDL.Func([], [IDL.Text], []),
+    'getProposal' : IDL.Func([IDL.Int], [IDL.Opt(Proposal)], ['query']),
+    'setEnvironment' : IDL.Func([IDL.Text], [], []),
+    'submitProposal' : IDL.Func([IDL.Text, IDL.Text], [], []),
+    'updateWebpageContent' : IDL.Func([IDL.Text], [], []),
+    'vote' : IDL.Func([IDL.Int, IDL.Bool], [], []),
   });
 };
 export const init = ({ IDL }) => { return []; };

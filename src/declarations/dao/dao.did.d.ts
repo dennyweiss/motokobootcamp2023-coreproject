@@ -1,18 +1,22 @@
 import type { Principal } from '@dfinity/principal';
 import type { ActorMethod } from '@dfinity/agent';
 
-export type Proposal = {};
+export interface Proposal {
+  'status' : string,
+  'title' : string,
+  'created' : bigint,
+  'owner' : Principal,
+  'description' : string,
+  'votingFinished' : boolean,
+  'updated' : bigint,
+}
 export interface _SERVICE {
-  'get_all_proposals' : ActorMethod<[], Array<[bigint, Proposal]>>,
-  'get_proposal' : ActorMethod<[bigint], [] | [Proposal]>,
-  'submit_proposal' : ActorMethod<
-    [string],
-    { 'Ok' : Proposal } |
-      { 'Err' : string }
-  >,
-  'vote' : ActorMethod<
-    [bigint, boolean],
-    { 'Ok' : [bigint, bigint] } |
-      { 'Err' : string }
-  >,
+  'getAllProposals' : ActorMethod<[], Array<[bigint, Proposal]>>,
+  'getContent' : ActorMethod<[], string>,
+  'getEnvironment' : ActorMethod<[], string>,
+  'getProposal' : ActorMethod<[bigint], [] | [Proposal]>,
+  'setEnvironment' : ActorMethod<[string], undefined>,
+  'submitProposal' : ActorMethod<[string, string], undefined>,
+  'updateWebpageContent' : ActorMethod<[string], undefined>,
+  'vote' : ActorMethod<[bigint, boolean], undefined>,
 }
