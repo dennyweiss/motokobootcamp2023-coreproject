@@ -2,9 +2,7 @@
   "dao": {
     "ic": "usg2o-yyaaa-aaaak-qbu5q-cai"
   },
-  "icrc1": {
-    "ic": "6g7kk-baaaa-aaaak-qbvfa-cai"
-  },
+  "icrc1": {},
   "interface": {
     "ic": "uaanx-uiaaa-aaaak-qbu6q-cai"
   },
