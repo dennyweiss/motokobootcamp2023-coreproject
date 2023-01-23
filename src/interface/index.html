@@ -1,21 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="/app/favicon.svg" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Vite App</title>
+    <meta charset="UTF-8"/>
+    <link rel="icon" type="image/svg+xml" href="/app/favicon.svg"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Headless DAO</title>
+    <link rel="stylesheet" href="https://unpkg.com/@highlightjs/cdn-assets@11.7.0/styles/default.min.css">
+    <script type="module">
+        import hljs from 'https://unpkg.com/@highlightjs/cdn-assets@11.7.0/es/highlight.min.js'
+        //  and it's easy to individually load & register additional languages
+        import go from 'https://unpkg.com/@highlightjs/cdn-assets@11.7.0/es/languages/go.min.js'
+
+        hljs.registerLanguage('go', go)
+    </script>
 </head>
 <body>
 <div id="root"></div>
 <script type="module">
-  /**
-   * @dfinity/agent requires this. Can be removed once it's fixed
-   */
-  import { Buffer } from "buffer"
+    /**
+     * @dfinity/agent requires this. Can be removed once it's fixed
+     */
+    import {Buffer} from 'buffer'
 
-  window.global = window
-  window.Buffer = Buffer
+    window.global = window
+    window.Buffer = Buffer
 </script>
 <script type="module" src="/main.ts"></script>
 </body>

@@ -7,7 +7,7 @@ module TempleRenderer {
       # "<html class=\"no-js\" lang=\"\">" 
       # "<head>" 
       # "  <meta charset=\"utf-8\">" 
-      # "  <title>Motoko Bootcamp DAO feeded Webpage</title>" 
+      # "  <title>Headless DAO</title>"
       # "  <meta name=\"description\" content=\"\">" 
       # "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">" 
       # "" 
@@ -23,7 +23,7 @@ module TempleRenderer {
       # "" 
       # "<body style=\"font-family: sans-serif;\">" 
       # "" 
-      # "  <h1 class=\"marging-bottom:32px;\">Motoko Bootcamp DAO feeded Webpage</h1>" 
+      # "  <h1 class=\"marging-bottom:32px;\">Headless DAO</h1>"
       # "" 
       # "  <p>" 
       # content 

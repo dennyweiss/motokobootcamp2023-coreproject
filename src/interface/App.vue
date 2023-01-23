@@ -1,71 +1,103 @@
 <template>
-  <Connect2ICProvider :client="client">
-    <div class="App">
-      <div class="auth-section">
-        <ConnectButton />
-      </div>
-      <ConnectDialog />
-      <header class="App-header">
-        <img :src="logo" class="App-logo" alt="logo" />
-        <p class="slogan">Vue+TypeScript Template</p>
-        <p class="twitter">
-          by <a href="https://twitter.com/miamaruq">@miamaruq</a>
-        </p>
-      </header>
-
-      <p class="examples-title">Examples</p>
-      <div class="examples">
-        <Counter />
-        <Profile />
-        <Transfer />
-      </div>
+  <div class="App px-4 lg:px-8">
+    <header class="App-header !h-72">
+      <img :src="logo" class="App-logo" alt="logo"/>
+      <p class="slogan">Headless DAO</p>
+    </header>
+    <div class="max-w-screen-sm px-8 mx-auto whitespace-pre-line">
+      <p class="block  whitespace-pre-line flex justify-center text-center">
+        For interacting with the Headless DAO <br> be a real Developer and use use `DFX` and a DFX based principle<br>and
+        a DFX wallet that holds and MB tokens.
+      </p>
+      <p class="block">
+        <strong class="block mt-4 mb-3  text-center">Features:</strong>
+      <ul class="px-4 text-center">
+        <li>Proposal live cycle [isDraft,isPublished,isArchived]</li>
+        <li>Proposal ownership <i>(owner publishes proposals)</i></li>
+        <li>Proposal submission requires 1 MB</li>
+        <li>Proposal execution happens automatically when the votings accumulated 100.0 voting power</li>
+        <li>Executed proposals are automatically archived</li>
+        <li>Proposal target webpage is certified</li>
+      </ul>
+      </p>
+      <p class="block">
+        <strong class="block mt-4 mb-3 text-center">IC network canisters</strong>
+        <pre><code class="language-json">
+          {
+            "dao": {
+              "ic": "usg2o-yyaaa-aaaak-qbu5q-cai"
+            },
+            "interface": {
+              "ic": "uaanx-uiaaa-aaaak-qbu6q-cai"
+            },
+            "webpage": {
+              "ic": "uhbld-zqaaa-aaaak-qbu6a-cai"
+            }
+          }
+        </code></pre>
+      </p>
+      <p class="block">
+        <strong class="block mt-4 mb-3 text-center">dfx.json</strong>
+         <pre><code class="language-json">
+          {
+            "canisters": {
+              "webpage": {
+                "main": "./src/webpage/main.mo",
+                "type": "motoko"
+              },
+              "dao": {
+                "main": "./src/dao/main.mo",
+                "type": "motoko"
+              },
+              "assets": {
+                "dependencies": [
+                  "webpage",
+                  "dao"
+                ],
+                "frontend": {
+                  "entrypoint": "dist/index.html"
+                },
+                "source": [
+                  "dist/"
+                ],
+                "type": "assets"
+              }
+            },
+            "defaults": {
+              "build": {
+                "packtool": ""
+              }
+            },
+            "networks": {
+              "local": {
+                "bind": "127.0.0.1:8000",
+                "type": "ephemeral"
+              },
+              "ic": {
+                "providers": [
+                  "https://mainnet.dfinity.network"
+                ],
+                "type": "persistent"
+              }
+            },
+            "version": 1
+          }
+        </code></pre>
+      </p>
     </div>
-  </Connect2ICProvider>
+  </div>
 </template>
 
 <script setup lang="ts">
-import logo from "@/app/assets/dfinity.svg"
-/*
- * Connect2ic provides essential utilities for IC app development
- */
-import { createClient } from "@connect2ic/core"
-import { defaultProviders } from "@connect2ic/core/providers"
-import {
-  ConnectButton,
-  ConnectDialog,
-  Connect2ICProvider,
-} from "@connect2ic/vue"
-import "@connect2ic/core/style.css"
-/*
- * Import canister definitions like this:
- */
-// import * as counter from "canisters/counter"
-/*
- * Some examples to get you started
- */
-import Counter from "@/app/components/Counter.vue"
-import Profile from "@/app/components/Profile.vue"
-import Transfer from "@/app/components/Transfer.vue"
-
-const client = createClient({
-  canisters: {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    // counter,
-  },
-  providers: defaultProviders,
-  globalProviderConfig: {
-    dev: import.meta.env.DEV,
-  },
-})
+import logo from '@/app/assets/dfinity.svg'
 </script>
 
 <style>
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-    sans-serif;
+  "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+  sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #424242;
