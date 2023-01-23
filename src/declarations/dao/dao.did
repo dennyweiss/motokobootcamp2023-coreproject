@@ -1,23 +1,85 @@
-type Proposal = 
+type VotingResult = 
+ variant {
+   adopted;
+   pending;
+   rejected;
+ };
+type VotingPower = float64;
+type VotesTupel = 
  record {
+   text;
+   Vote;
+ };
+type VoteValue = 
+ variant {
+   adopt;
+   reject;
+ };
+type Vote = 
+ record {
+   createdAt: int;
+   proposalId: text;
+   voteValue: VoteValue;
+   voter: principal;
+   votingPower: VotingPower;
+ };
+type Tokens = nat;
+type Result = 
+ variant {
+   err: text;
+   ok;
+ };
+type Proposal__1 = 
+ record {
+   adoptValue: VotingPower;
    created: int;
    description: text;
    owner: principal;
-   status: text;
+   payload: text;
+   rejectValue: VotingPower;
+   status: ProposalStatus;
    title: text;
    updated: int;
-   votingFinished: bool;
+   votingResult: VotingResult;
+ };
+type ProposalTupel = 
+ record {
+   text;
+   Proposal;
+ };
+type ProposalStatus = 
+ variant {
+   isArchived;
+   isDraft;
+   isPublished;
+ };
+type Proposal = 
+ record {
+   adoptValue: VotingPower;
+   created: int;
+   description: text;
+   owner: principal;
+   payload: text;
+   rejectValue: VotingPower;
+   status: ProposalStatus;
+   title: text;
+   updated: int;
+   votingResult: VotingResult;
+ };
+type EnvironmentType = 
+ variant {
+   ic;
+   local;
  };
 service : {
-  getAllProposals: () -> (vec record {
-                                int;
-                                Proposal;
-                              }) query;
-  getContent: () -> (text);
-  getEnvironment: () -> (text);
-  getProposal: (int) -> (opt Proposal) query;
-  setEnvironment: (text) -> ();
-  submitProposal: (text, text) -> ();
+  allVotes: () -> (vec VotesTupel);
+  changeState: (text, ProposalStatus) -> (Result);
+  getBalance: () -> (Tokens);
+  getProposal: (text) -> (opt Proposal__1);
+  getProposals: () -> (vec ProposalTupel);
+  setEnvironment: (EnvironmentType) -> (EnvironmentType);
+  submitProposal: (text, text, text) -> (Result);
+  updateContent: (text, text, text, text) -> (Result);
   updateWebpageContent: (text) -> ();
-  vote: (int, bool) -> ();
+  vote: (text, VoteValue) -> (Result);
 }

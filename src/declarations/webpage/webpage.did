@@ -36,10 +36,14 @@ type HeaderField =
    text;
    text;
  };
+type EnvironmentType = 
+ variant {
+   ic;
+   local;
+ };
 service : {
-  getContent: () -> (text) query;
-  getEnvironment: () -> (text);
+  getContent: () -> (blob);
   http_request: (HttpRequest) -> (HttpResponse) query;
-  setEnvironment: (text) -> ();
+  setEnvironment: (EnvironmentType) -> (EnvironmentType);
   updateWebpageContent: (text) -> ();
 }

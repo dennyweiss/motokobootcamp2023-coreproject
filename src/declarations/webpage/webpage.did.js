@@ -32,11 +32,11 @@ export const idlFactory = ({ IDL }) => {
     'streaming_strategy' : IDL.Opt(StreamingStrategy),
     'status_code' : IDL.Nat16,
   });
+  const EnvironmentType = IDL.Variant({ 'ic' : IDL.Null, 'local' : IDL.Null });
   return IDL.Service({
-    'getContent' : IDL.Func([], [IDL.Text], ['query']),
-    'getEnvironment' : IDL.Func([], [IDL.Text], []),
+    'getContent' : IDL.Func([], [IDL.Vec(IDL.Nat8)], []),
     'http_request' : IDL.Func([HttpRequest], [HttpResponse], ['query']),
-    'setEnvironment' : IDL.Func([IDL.Text], [], []),
+    'setEnvironment' : IDL.Func([EnvironmentType], [EnvironmentType], []),
     'updateWebpageContent' : IDL.Func([IDL.Text], [], []),
   });
 };

@@ -1,6 +1,8 @@
 import type { Principal } from '@dfinity/principal';
 import type { ActorMethod } from '@dfinity/agent';
 
+export type EnvironmentType = { 'ic' : null } |
+  { 'local' : null };
 export type HeaderField = [string, string];
 export interface HttpRequest {
   'url' : string,
@@ -34,9 +36,8 @@ export type StreamingStrategy = {
     }
   };
 export interface _SERVICE {
-  'getContent' : ActorMethod<[], string>,
-  'getEnvironment' : ActorMethod<[], string>,
+  'getContent' : ActorMethod<[], Uint8Array>,
   'http_request' : ActorMethod<[HttpRequest], HttpResponse>,
-  'setEnvironment' : ActorMethod<[string], undefined>,
+  'setEnvironment' : ActorMethod<[EnvironmentType], EnvironmentType>,
   'updateWebpageContent' : ActorMethod<[string], undefined>,
 }
