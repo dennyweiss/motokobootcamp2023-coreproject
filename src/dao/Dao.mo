@@ -19,6 +19,9 @@ import AccountHelper "../modules/AccountHelper";
 import UUIDFactory "../modules/UUIDFactory";
 import Ledger "../modules/Ledger";
 import VotingPower "../modules/VotingPower";
+import Map "mo:motoko-hash-map/Map";
+import Option "mo:base/Option";
+import Time "mo:base/Time";
 
 actor Dao {
   //////////////////////////////////////////////////////////////////////////////
@@ -43,25 +46,84 @@ actor Dao {
   //////////////////////////////////////////////////////////////////////////////
   // Proposal //////////////////////////////////////////////////////////////////
   type Proposal = Proposal.Proposal;
-  var proposals = HashMap.HashMap<Text, Proposal>(1, Text.equal, Text.hash);
+  stable var proposals : Proposal.Proposals = Map.new<Text, Proposal>();
 
-  public query func getProposal(uuid : Text) : async ?Proposal {
-    // 1. Auth
-    //2. Query data.
-    let proposal : ?Proposal = proposals.get(uuid);
-    proposal;
+  // 👇 implementation of `get_proposal`
+  public shared ({ caller }) func getProposal(uuid : Text) : async ?Proposal {
+    Proposal.get(proposals, uuid, ?caller);
   };
 
-  public query func getAllProposals() : async [(Text, Proposal)] {
-    //1. authenticate
-    //2. Hashmap to Iter.
-    let proposalIter : Iter.Iter<(Text, Proposal)> = proposals.entries();
-    //3. Iter to Array.
-    let proposalArray : [(Text, Proposal)] = Iter.toArray(proposalIter);
-    //4. Iter to Array.
-    proposalArray;
+  // 👇 implementation of `get_all_proposals`
+  public shared ({ caller }) func getProposals() : async [Proposal.ProposalTupel] {
+    Proposal.all(proposals, ?caller);
   };
 
+  public shared ({ caller }) func updateContent(
+    uuid : Text,
+    title : Text,
+    description : Text,
+    payload : Text,
+  ) : async Result.Result<(), Text> {
+
+    let proposal = Proposal.get(proposals, uuid, ?caller);
+
+    switch (proposal) {
+      case (?proposal) {
+        if( not Principal.equal(proposal.owner, caller) ) {
+          return #err("only proposal owner are allowed to change proposals");
+        };
+        if (proposal.status != #isDraft) {
+          return #err("only proposals with draft status can be updated");
+        };
+        let newProposal : Proposal = {
+          title = title;
+          description = description;
+          payload = payload;
+          status = proposal.status;
+          owner = proposal.owner;
+          created = proposal.created;
+          updated = Int.abs(Time.now());
+        };
+        Proposal.createOrUpdate(proposals, uuid, newProposal);
+        return #ok();
+      };
+      case (null) {
+        return #err("proposal not found");
+      };
+    };
+  };
+
+  public shared ({ caller }) func changeState(uuid : Text, status : Proposal.ProposalStatus) : async Result.Result<(), Text> {
+    if (status != #isPublished and status != #isArchived) {
+      return #err("state change not allowed");
+    };
+
+    let proposal = Proposal.get(proposals, uuid, ?caller);
+
+    switch (proposal) {
+      case (?proposal) {
+        if (proposal.status == #isArchived) {
+          return #err("archived proposals can't be unarchived");
+        };
+        let newProposal : Proposal = {
+          title = proposal.title;
+          description = proposal.description;
+          payload = proposal.payload;
+          status = status;
+          owner = proposal.owner;
+          created = proposal.created;
+          updated = Int.abs(Time.now());
+        };
+        Proposal.createOrUpdate(proposals, uuid, newProposal);
+        return #ok();
+      };
+      case (null) {
+        return #err("proposal not found");
+      };
+    };
+  };
+
+  // 👇 implementation of `submit_proposal`
   public shared ({ caller }) func submitProposal(
     title : Text,
     description : Text,
@@ -70,17 +132,19 @@ actor Dao {
     let account = { owner = caller; subaccount = null };
     let mbTokenBalance : Ledger.Tokens = await Ledger.createActor(environment).icrc1_balance_of(account);
     if (VotingPower.hasMinimalVotingPowerFromTokens(mbTokenBalance)) {
-      let proposal = Proposal.create(
+      let proposal = Proposal.make(
         title,
         description,
         payload,
         caller,
       );
-      proposals.put(await UUIDFactory.create(), proposal);
-      Debug.print(debug_show(VotingPower.normalizedFromTokens(mbTokenBalance)));
+      let uuid : Text = await UUIDFactory.create();
+      Proposal.createOrUpdate(proposals, uuid, proposal);
+      Debug.print(debug_show (VotingPower.normalizedFromTokens(mbTokenBalance)));
+      Debug.print(debug_show ({ uuid : Text = uuid; proposal : Proposal = proposal }));
       #ok();
     } else {
-      #err("Proposal account has insufficient funds to transfer " # Nat.toText(mbTokenBalance) );
+      #err("insufficient voting power for submitting a proposal" # Nat.toText(mbTokenBalance));
     };
   };
 
@@ -90,6 +154,7 @@ actor Dao {
   stable var votesIdCount : Nat = 0;
   var votes = HashMap.HashMap<Int, Vote>(1, Int.equal, Int.hash);
 
+  // 👇 implementation of `vote`
   public shared ({ caller }) func vote(proposalId : Int, yesOrNo : Bool) : async () {
     //1. auth
 

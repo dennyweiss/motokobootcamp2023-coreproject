@@ -41,6 +41,11 @@ let additions = [
   , repo = "https://github.com/aviate-labs/io.mo"
   , dependencies = [ "base-0.7.3" ]
   },
+  { name = "motoko-hash-map"
+  , version = "v7.0.0"
+  , repo = "https://github.com/ZhenyaUsenko/motoko-hash-map"
+  , dependencies = [ "base" ]
+  },
 ]
 
 in  upstream # icbase # icos # additions # additions
