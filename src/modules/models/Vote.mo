@@ -2,9 +2,14 @@ import Principal "mo:base/Principal";
 import Bool "mo:base/Bool";
 import Int "mo:base/Int";
 import Time "mo:base/Time";
-import Proposal "Proposal";
 
 module Vote {
+
+  public type VotingResult = {
+    #pending;
+    #adopted;
+    #rejected;
+  };
 
   public type Vote = {
     proposalId : Int;

@@ -83,6 +83,7 @@ actor Dao {
           owner = proposal.owner;
           created = proposal.created;
           updated = Int.abs(Time.now());
+          votingResult = #pending;
         };
         Proposal.createOrUpdate(proposals, uuid, newProposal);
         return #ok();
@@ -113,6 +114,7 @@ actor Dao {
           owner = proposal.owner;
           created = proposal.created;
           updated = Int.abs(Time.now());
+          votingResult = #pending;
         };
         Proposal.createOrUpdate(proposals, uuid, newProposal);
         return #ok();
@@ -151,20 +153,16 @@ actor Dao {
   //////////////////////////////////////////////////////////////////////////////
   // Voting ////////////////////////////////////////////////////////////////////
   type Vote = Vote.Vote;
-  stable var votesIdCount : Nat = 0;
-  var votes = HashMap.HashMap<Int, Vote>(1, Int.equal, Int.hash);
+
+  stable var votes : Proposal.Proposals = Map.new<Text, Proposal>();
 
   // 👇 implementation of `vote`
-  public shared ({ caller }) func vote(proposalId : Int, yesOrNo : Bool) : async () {
+  public shared ({ caller }) func vote(proposalId : Text, yesOrNo : Bool) : async () {
     //1. auth
 
     //2. Prepare data.
-    let id : Nat = votesIdCount;
-    votesIdCount += 1;
-    let vote = Vote.create(id, caller);
 
     //3. Create vote.
-    votes.put(id, vote);
 
     //4. return confirmation.
     ();

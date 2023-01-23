@@ -10,6 +10,7 @@ import Order "mo:base/Order";
 import Option "mo:base/Option";
 import Text "mo:base/Text";
 import Debug "mo:base/Debug";
+import Vote "Vote";
 
 module Proposal {
 
@@ -33,6 +34,7 @@ module Proposal {
     owner : Principal;
     created : Int;
     updated : Int;
+    votingResult: Vote.VotingResult;
   };
 
   public type PrincipalStatus = {
@@ -87,6 +89,7 @@ module Proposal {
       owner = owner;
       created = Int.abs(Time.now());
       updated = Int.abs(Time.now());
+      votingResult= #pending;
     };
     return proposal;
   };
