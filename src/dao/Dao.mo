@@ -69,7 +69,7 @@ actor Dao {
 
     switch (proposal) {
       case (?proposal) {
-        if( not Principal.equal(proposal.owner, caller) ) {
+        if (not Principal.equal(proposal.owner, caller)) {
           return #err("only proposal owner are allowed to change proposals");
         };
         if (proposal.status != #isDraft) {
