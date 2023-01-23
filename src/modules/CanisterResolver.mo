@@ -12,7 +12,7 @@ module CanisterResolver {
     switch (canisterType) {
       case (#dao) {
         switch (environmentType) {
-          case (#local) "rrkah-fqaaa-aaaaa-aaaaq-cai";
+          case (#local) "r7inp-6aaaa-aaaaa-aaabq-cai";
           case (#ic) "usg2o-yyaaa-aaaak-qbu5q-cai";
         };
       };

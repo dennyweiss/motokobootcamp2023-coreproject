@@ -10,6 +10,7 @@ import Nat8 "mo:base/Nat8";
 import Nat64 "mo:base/Nat64";
 import Float "mo:base/Float";
 import Nat "mo:base-0.7.3/Nat";
+import VotingPower "../modules/VotingPower";
 
 actor class Ledger() {
 
@@ -28,7 +29,7 @@ actor class Ledger() {
   let init = {
     initial_mints = [{
       account : Account = { owner = minitingAccount; subaccount = null };
-      amount : Nat = 1000000000000000;
+      amount : Nat = 12000000000;
     }];
     minting_account : Account = { owner = minitingAccount; subaccount = null };
     token_name : Text = "Motoko Bootcamp Token";
@@ -390,12 +391,15 @@ actor class Ledger() {
   public func simple_transfer({
     from_subaccount : ?Subaccount;
     to : Text;
-    amount : Tokens;
+    amount : VotingPower.VotingPower;
     fee : ?Tokens;
     memo : ?Memo;
     created_at_time : ?Timestamp;
   }) : async Result<TxIndex, TransferError> {
     let spender : Principal = Principal.fromText("5m3tu-nosn3-v3z4m-fakpj-hqcry-coizo-v27x5-2ymrh-d7qi5-f6mll-bae");
+
+    let resutlingAmount = VotingPower.toNat(amount);
+
     applyTransfer({
       spender = spender;
       source = #Icrc1Transfer;
@@ -404,7 +408,7 @@ actor class Ledger() {
         subaccount = from_subaccount;
       };
       to = { owner = Principal.fromText(to); subaccount = null; };
-      amount = amount;
+      amount = resutlingAmount;
       fee = fee;
       memo = memo;
       created_at_time = created_at_time;
@@ -636,5 +640,8 @@ actor class Ledger() {
     };
   };
 
+  public shared ({ caller }) func votingPowerOf(principle: Text) : async VotingPower.VotingPower {
+    VotingPower.normalizedFromTokens(await icrc1_balance_of({ owner = caller; subaccount = null;}));
+  };
 
 };

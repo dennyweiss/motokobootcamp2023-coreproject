@@ -4,7 +4,6 @@ import HashMap "mo:base/HashMap";
 import Nat "mo:base/Nat";
 import Hash "mo:base/Hash";
 import Int "mo:base/Int";
-import Iter "mo:base/Iter";
 import EnvironmentGuards "../modules/guards/EnvironmentGuards";
 import PrincipleTypeGuard "../modules/guards/PrincipleTypeGuard";
 import Environment "../modules/Environment";
@@ -22,6 +21,11 @@ import VotingPower "../modules/VotingPower";
 import Map "mo:motoko-hash-map/Map";
 import Option "mo:base/Option";
 import Time "mo:base/Time";
+import Float "mo:base/Float";
+import Iter "mo:base/Iter";
+import VoteFinalizer "../modules/VoteFinalizer";
+import Array "mo:base/Array";
+import Buffer "mo:base/Buffer";
 
 actor Dao {
   //////////////////////////////////////////////////////////////////////////////
@@ -84,6 +88,8 @@ actor Dao {
           created = proposal.created;
           updated = Int.abs(Time.now());
           votingResult = #pending;
+          adoptValue = 0;
+          rejectValue = 0;
         };
         Proposal.createOrUpdate(proposals, uuid, newProposal);
         return #ok();
@@ -115,6 +121,8 @@ actor Dao {
           created = proposal.created;
           updated = Int.abs(Time.now());
           votingResult = #pending;
+          adoptValue = 0;
+          rejectValue = 0;
         };
         Proposal.createOrUpdate(proposals, uuid, newProposal);
         return #ok();
@@ -146,7 +154,7 @@ actor Dao {
       Debug.print(debug_show ({ uuid : Text = uuid; proposal : Proposal = proposal }));
       #ok();
     } else {
-      #err("insufficient voting power for submitting a proposal" # Nat.toText(mbTokenBalance));
+      #err("insufficient voting power for submitting a proposal");
     };
   };
 
@@ -154,18 +162,116 @@ actor Dao {
   // Voting ////////////////////////////////////////////////////////////////////
   type Vote = Vote.Vote;
 
-  stable var votes : Proposal.Proposals = Map.new<Text, Proposal>();
+  stable var votes : Vote.Votes = Map.new<Text, Vote>();
 
   // 👇 implementation of `vote`
-  public shared ({ caller }) func vote(proposalId : Text, yesOrNo : Bool) : async () {
-    //1. auth
+  public shared ({ caller }) func vote(proposalId : Text, voteValue : Vote.VoteValue) : async Result.Result<(), Text> {
 
-    //2. Prepare data.
+    let account = { owner = caller; subaccount = null };
+    let mbTokenBalance : Ledger.Tokens = await Ledger.createActor(environment).icrc1_balance_of(account);
+    if (not VotingPower.hasMinimalVotingPowerFromTokens(mbTokenBalance)) {
+      return #err("insufficient voting power for vote for a proposal");
+    };
 
-    //3. Create vote.
+    let proposal = Proposal.get(proposals, proposalId, ?caller);
 
-    //4. return confirmation.
-    ();
+    switch (proposal) {
+      case (?proposal) {
+        if (proposal.status == #isDraft or proposal.status == #isArchived) {
+          return #err("voting is only allowed for proposals with published state");
+        };
+
+        Debug.print(debug_show ({ id : Text = proposalId; proposal : Proposal.ProposalStatus = proposal.status }));
+
+        if (Vote.hasVoted(votes, proposalId, caller)) {
+          return #err("voting denied already voted");
+        };
+
+        let vote = Vote.castVote(
+          votes,
+          proposalId,
+          await UUIDFactory.create(),
+          caller,
+          voteValue,
+          VotingPower.normalizedFromTokens(mbTokenBalance),
+        );
+
+        let votingMetrics : Vote.VotingMetrics = Vote.resolveVotingResult(votes, proposalId);
+
+        switch (votingMetrics.votingResult) {
+          case (#adopted) {
+            let updatedProposal = {
+              title = proposal.title;
+              description = proposal.description;
+              payload = proposal.payload;
+              status = #isArchived;
+              owner = proposal.owner;
+              created = proposal.created;
+              updated = Int.abs(Time.now());
+              votingResult = votingMetrics.votingResult;
+              adoptValue = votingMetrics.adoptValue;
+              rejectValue = votingMetrics.rejectValue;
+            };
+            Proposal.createOrUpdate(proposals, proposalId, updatedProposal);
+            await Webpage.updateWebpageContent(proposal.payload);
+            return #ok();
+          };
+          case (#pending) {
+            let updatedProposal = {
+              title = proposal.title;
+              description = proposal.description;
+              payload = proposal.payload;
+              status = proposal.status;
+              owner = proposal.owner;
+              created = proposal.created;
+              updated = Int.abs(Time.now());
+              votingResult = votingMetrics.votingResult;
+              adoptValue = votingMetrics.adoptValue;
+              rejectValue = votingMetrics.rejectValue;
+            };
+            Proposal.createOrUpdate(proposals, proposalId, updatedProposal);
+            return #ok();
+          };
+          case (#rejected) {
+            let updatedProposal = {
+              title = proposal.title;
+              description = proposal.description;
+              payload = proposal.payload;
+              status = #isArchived;
+              owner = proposal.owner;
+              created = proposal.created;
+              updated = Int.abs(Time.now());
+              votingResult = votingMetrics.votingResult;
+              adoptValue = votingMetrics.adoptValue;
+              rejectValue = votingMetrics.rejectValue;
+            };
+            Proposal.createOrUpdate(proposals, proposalId, updatedProposal);
+            return #ok();
+          };
+        };
+
+      };
+      case (null) {
+        return #err("proposal not found");
+      };
+    };
+  };
+
+  public shared ({ caller }) func allVotes() : async [Vote.VotesTupel] {
+    var votesIter : Iter.Iter<Vote.VotesTupel> = Map.entries<Text, Vote>(votes);
+
+    // all votes by proposalId
+    let proposapId : Text = "0dc8c77e-544c-4a3f-b9f5-5b6cdba1b136";
+    votesIter := Iter.filter<Vote.VotesTupel>(
+      votesIter,
+      func(item : Vote.VotesTupel) : Bool {
+        let (_, vote : Vote) = item;
+        vote.proposalId == proposapId;
+      },
+    );
+
+    let votessArray : [Vote.VotesTupel] = Iter.toArray(votesIter);
+    votessArray;
   };
 
   //////////////////////////////////////////////////////////////////////////////

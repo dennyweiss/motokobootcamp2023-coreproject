@@ -3,6 +3,7 @@ import Nat "mo:base/Nat";
 import Int "mo:base/Int";
 import Int64 "mo:base/Int64";
 import Result "mo:base/Result";
+import Nat64 "mo:base/Nat64";
 
 module VotingPower {
   public type VotingPower = Float;
@@ -12,6 +13,15 @@ module VotingPower {
   public func toFloat(number : Nat) : Float {
     Float.fromInt64(Int64.fromInt(number));
   };
+
+  public func toNat(value : VotingPower) : Nat {
+    let powerFloat : Float = toFloat(decimals);
+    let baseFloat : Float = toFloat(base);
+    let decimalsFactorFloat : Float = baseFloat ** powerFloat;
+    let result = value * decimalsFactorFloat;
+    let resultNat : Nat = Nat64.toNat(Int64.toNat64(Float.toInt64(result)));
+  };
+
   public func normalizedFromTokens(tokens : Nat) : VotingPower {
     let powerFloat : Float = toFloat(decimals);
     let baseFloat : Float = toFloat(base);
@@ -23,8 +33,8 @@ module VotingPower {
     hasMinimalVotingPower(normalizedFromTokens(tokens));
   };
 
-  public func hasMinimalVotingPower( votingPower : VotingPower ) : Bool {
-    Float.greaterOrEqual(votingPower,normalizedMinimalVotingPower);
-  }
+  public func hasMinimalVotingPower(votingPower : VotingPower) : Bool {
+    Float.greaterOrEqual(votingPower, normalizedMinimalVotingPower);
+  };
 
 };

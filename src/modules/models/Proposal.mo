@@ -11,18 +11,21 @@ import Option "mo:base/Option";
 import Text "mo:base/Text";
 import Debug "mo:base/Debug";
 import Vote "Vote";
+import PrincipalHelper "../PrincipalHelper";
+import VotingPower "../VotingPower";
 
 module Proposal {
 
   public type ProposalTupel = (uuid : Text, proposal : Proposal);
   public type Proposals = Map.Map<Text, Proposal>;
+  public type PrincipalStatus = PrincipalHelper.PrincipalStatus;
+
   let { thash } = Map;
   public let proposalMapType : Map.HashUtils<Text> = thash;
 
   public type ProposalStatus = {
     #isDraft;
     #isPublished;
-    #votingHasFinsihed;
     #isArchived;
   };
 
@@ -35,28 +38,10 @@ module Proposal {
     created : Int;
     updated : Int;
     votingResult: Vote.VotingResult;
+    adoptValue : VotingPower.VotingPower;
+    rejectValue : VotingPower.VotingPower;
   };
 
-  public type PrincipalStatus = {
-    #isNull;
-    #isAnonymous;
-    #isReal;
-  };
-
-  func evaluatePrincipalStatus(principal : ?Principal) : PrincipalStatus {
-    switch (principal) {
-      case (?principal) {
-        if (Principal.isAnonymous(principal)) {
-          return #isAnonymous;
-        } else {
-          return #isReal;
-        };
-      };
-      case (null) {
-        return #isNull;
-      };
-    };
-  };
 
   func canAccessProposal(
     principalStatus : PrincipalStatus,
@@ -90,6 +75,8 @@ module Proposal {
       created = Int.abs(Time.now());
       updated = Int.abs(Time.now());
       votingResult= #pending;
+      adoptValue = 0;
+      rejectValue= 0;
     };
     return proposal;
   };
@@ -102,7 +89,7 @@ module Proposal {
     let proposal = Map.get<Text, Proposal>(proposals, proposalMapType, uuid);
     switch (proposal) {
       case (?proposal) {
-        if (canAccessProposal(evaluatePrincipalStatus(principal), proposal.status, ?proposal.owner, principal)) {
+        if (canAccessProposal(PrincipalHelper.evaluatePrincipalStatus(principal), proposal.status, ?proposal.owner, principal)) {
           ?proposal;
         } else {
           null;
@@ -116,7 +103,7 @@ module Proposal {
 
   public func all(proposals : Map.Map<Text, Proposal>, principal : ?Principal) : [ProposalTupel] {
     var proposalIter : Iter.Iter<ProposalTupel> = Map.entries<Text, Proposal>(proposals);
-    switch (evaluatePrincipalStatus(principal)) {
+    switch (PrincipalHelper.evaluatePrincipalStatus(principal)) {
       case (#isAnonymous or #isNull) {
         proposalIter := Iter.filter<ProposalTupel>(
           proposalIter,
